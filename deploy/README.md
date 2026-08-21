@@ -51,6 +51,44 @@ saqlansa, unda o'rin egallovchi matn qolib ketardi va sayt buzilardi.
 Bundan tashqari `.nojekyll` fayli qo'yiladi: Jekyll `_` bilan boshlanadigan
 fayllarni o'tkazib yuboradi, Flutter chiqishida esa bunday fayllar bor.
 
+#### Tuzoq: `build_type` `legacy` bo'lib qolsa
+
+Pages sayti ikki xil rejimda ishlaydi va noto'g'risi **jimgina** buzadi:
+
+| `build_type` | Nima bo'ladi |
+|---|---|
+| `workflow` | faqat bizning ish oqimimiz joylashtiradi — kerakli holat |
+| `legacy` | GitHub `main` shoxchasidan Jekyll bilan sayt quradi |
+
+`legacy` da har push ikkita joylashtirishni ishga tushiradi: bizniki va
+`pages build and deployment` nomli yashirin Jekyll ishi. Ikkinchisi
+`README.md` dan HTML yasab, bizning artefaktimiz **ustiga yozadi**. Natija —
+sayt ochiladi (HTTP 200), lekin ilova o'rniga README ko'rinadi va
+`flutter_bootstrap.js` 404 qaytaradi.
+
+Bu 2026-08-21 da haqiqatan sodir bo'ldi. Sayt bir marta to'g'ri ochilib,
+keyingi push dan keyin README ga aylandi — chunki ikkalasi navbatma-navbat
+yozgan va oxirgisi g'olib chiqqan.
+
+Tekshirish va tuzatish:
+
+```bash
+# holat
+curl -s -H "Authorization: Bearer $TOKEN" \
+  https://api.github.com/repos/<user>/<repo>/pages | grep build_type
+
+# tuzatish
+curl -X PUT -H "Authorization: Bearer $TOKEN" \
+  https://api.github.com/repos/<user>/<repo>/pages \
+  -d '{"build_type":"workflow"}'
+```
+
+Interfeysdan: **Settings -> Pages -> Source: GitHub Actions**.
+
+> Diqqat: `POST /pages` bilan sayt yaratganda `{"build_type":"workflow"}`
+> yuborilgan bo'lsa ham natija `legacy` bo'lib qolishi mumkin — yaratgandan
+> keyin `GET` bilan tasdiqlang.
+
 ### Netlify / Cloudflare Pages
 
 `web/_redirects` fayli allaqachon qo'shilgan va build paytida `build/web/`
