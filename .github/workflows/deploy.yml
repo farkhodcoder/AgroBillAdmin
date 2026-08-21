@@ -95,12 +95,17 @@ jobs:
           fi
           echo "toza"
 
-      #  — Pages ni ish oqimining o'zi yoqadi.
-      # Usiz repozitoriyda qo'lda «Settings -> Pages -> Source: GitHub
-      # Actions» qilish kerak bo'lardi va u qilinmaguncha       # har safar yiqilardi.
+      # Pages sayti BIR MARTA qo'lda yoqilgan (2026-08-21, `build_type:
+      # workflow`). Ish oqimi buni o'zi qila olmaydi:
+      # `configure-pages` ning `enablement: true` varianti sinab ko'rildi va
+      # `GITHUB_TOKEN` bilan yiqildi —
+      #   "Create Pages site failed. Resource not accessible by integration"
+      # chunki Pages saytini yaratish repo ADMIN huquqini talab qiladi,
+      # `GITHUB_TOKEN` da esa u yo'q (qancha `permissions` bersangiz ham).
+      #
+      # Ya'ni yangi repozitoriyda birinchi deploy'dan oldin:
+      # Settings -> Pages -> Source: GitHub Actions.
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web

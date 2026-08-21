@@ -3,6 +3,15 @@
 AgroBill platformasini boshqarish paneli — Flutter Web.
 Texnik topshiriq: [`../../agrobill/docs/ADMIN_TTZ.md`](../../agrobill/docs/ADMIN_TTZ.md) (TTZ v3.0).
 
+**Sayt:** https://farkhodcoder.github.io/AgroBillAdmin/
+`main` ga har push avtomatik joylashtiriladi —
+[`deploy.yml`](.github/workflows/deploy.yml).
+
+> **Kirish faqat parol bilan.** 2FA loyiha egasining qarori bilan olib
+> tashlangan (`0019`). Panel ochiq internetda turgani uchun super admin
+> paroli — platformaning butun ma'lumotiga yagona to'siq. Batafsil:
+> [Xavfsizlik — asosiy qoida](#xavfsizlik--asosiy-qoida).
+
 ## Joriy holat
 
 | Bosqich | Holat |
