@@ -9,9 +9,8 @@ import '../../../ui/admin_button.dart';
 import '../../../ui/admin_feedback.dart';
 import '../../../ui/admin_field.dart';
 import '../../../ui/auth_scaffold.dart';
-import '../../../ui/theme_switch.dart';
 import '../cubit/admin_auth_cubit.dart';
-import '../widgets/language_switch.dart';
+import '../widgets/login_footer.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -58,14 +57,7 @@ class _LoginPageState extends State<LoginPage> {
         return AuthScaffold(
           title: 'admin.auth.sign_in_title'.tr(),
           subtitle: 'admin.auth.sign_in_subtitle'.tr(),
-          footer: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const LanguageSwitch(),
-              const SizedBox(width: AgSpace.x3),
-              ThemeSwitch(controller: getIt<ThemeController>()),
-            ],
-          ),
+          footer: LoginFooter(controller: getIt<ThemeController>()),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

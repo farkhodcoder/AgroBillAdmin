@@ -145,6 +145,63 @@ ishlaydigan kichik skript bor: u ayni kalitni o'qib `<html>` ga
 Skriptdagi kalit `theme_controller.dart` dagi `_storageKey` bilan bir xil
 bo'lishi shart.
 
+## Sessiya — bir marta kirgandan keyin
+
+Kirish **saqlanib qoladi**: `supabase_flutter` sessiyani brauzerning
+`localStorage` iga yozadi (`SharedPreferencesLocalStorage` — sukut bo'yicha).
+Sahifani yangilash, tabni yopish, hatto brauzerni qayta ochish ham
+qaytadan kirishni talab qilmaydi.
+
+Kirish token muddati ~1 soat, lekin yonida **refresh token** turadi va
+Supabase uni fonda avtomatik yangilaydi — foydalanuvchi buni sezmaydi.
+
+Bir joyda ehtiyot bo'lish kerak edi: brauzer uzoq yopiq turgandan keyin
+saqlangan token muddati o'tgan bo'ladi. Supabase uni fonda yangilaydi,
+lekin `bootstrap()` undan OLDIN ulgurib so'rov yuboradi va 401 oladi —
+natijada haqiqiy sessiya bor bo'lsa ham admin kirish ekranini ko'rardi.
+Shuning uchun `AdminAuthCubit` auth hodisalarini ikki tomonlama tinglaydi:
+sessiya tugasa kirish ekraniga qaytaradi, **tiklansa** bosqichni qayta
+aniqlaydi.
+
+Sessiya quyidagi hollarda tugaydi:
+
+* «Chiqish» bosilganda,
+* refresh token muddati o'tganda (Supabase loyihasidagi sozlama),
+* `admin-force-logout` Edge Function chaqirilganda,
+* brauzer ma'lumotlari tozalanganda.
+
+> Umumiy kompyuterda ishlatilsa bu diqqat talab qiladi: panel ochiq
+> qolgan brauzerda keyingi odam to'g'ridan-to'g'ri ichkariga kiradi.
+> Ishni tugatgach «Chiqish» bosilsin.
+
+## Brend belgisi va ikonkalar
+
+Barg shakli **uch joyda** takrorlanadi va uchalasi mos kelishi shart:
+
+| Joy | Manba |
+|---|---|
+| Brauzer yorlig'i, PWA | `web/favicon.png`, `web/icons/*.png` |
+| Yuklanish ekrani | `web/index.html` dagi ichki SVG |
+| Ilova ichi (kirish, sidebar, splash) | [lib/ui/agro_mark.dart](lib/ui/agro_mark.dart) |
+
+Shakl — **ikki doira kesishmasi**: markazlari diagonal bo'ylab siljigan
+ikkita doira klassik barg konturini beradi. Geometriya raqamlari
+(`r = 1.04·c`, `d = 0.499·c`, tomir `0.54·c`) uchalasida bir xil.
+
+PNG'larni [tool/make_icons.js](tool/make_icons.js) yaratadi:
+
+```bash
+node tool/make_icons.js preview   # terminalda shaklni ko'rish
+node tool/make_icons.js write     # fayllarni qayta yozish
+```
+
+Skript o'z ichida minimal PNG kodlovchiga ega (`zlib` Node bilan keladi) —
+`sharp` yoki ImageMagick o'rnatish talab qilinmaydi. Har piksel 4×4 namuna
+bilan hisoblanadi, shuning uchun qirralar silliq chiqadi.
+
+Maskali variant (`Icon-maskable-*`) burchagi yumaloqlanmaydi — tizim uni
+o'zi qirqadi — va barg xavfsiz zonaga sig'adi (52% masshtab).
+
 ## Ishga tushirish
 
 ```powershell

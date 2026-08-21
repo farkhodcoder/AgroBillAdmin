@@ -34,15 +34,29 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
     }
 
     _authSub ??= Db.authChanges.listen((event) {
-      // Sessiya tashqaridan tugasa (token muddati, boshqa tabda chiqish)
+      // Sessiya tashqaridan tugasa (chiqish, boshqa tabda chiqish)
       // router darhol kirish ekraniga qaytarsin.
-      if (Db.currentUser == null && state.stage != AuthStage.signedOut) {
-        emit(
-          state.copyWith(
-            stage: AuthStage.signedOut,
-            permissions: const AdminPermissions.none(),
-          ),
-        );
+      if (Db.currentUser == null) {
+        if (state.stage != AuthStage.signedOut) {
+          emit(
+            state.copyWith(
+              stage: AuthStage.signedOut,
+              permissions: const AdminPermissions.none(),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Teskari yo'nalish ham kerak: brauzer yopilib qayta ochilganda
+      // saqlangan token muddati o'tgan bo'lishi mumkin. Supabase uni
+      // FONDA yangilaydi, lekin `bootstrap()` undan oldin ulgurib
+      // so'rov yuboradi va 401 oladi — natijada haqiqiy sessiya bor
+      // bo'lsa ham admin kirish ekranini ko'rardi.
+      //
+      // Token yangilangach hodisa keladi va bosqich qayta aniqlanadi.
+      if (state.stage == AuthStage.signedOut && !state.busy) {
+        unawaited(_refresh());
       }
     });
 

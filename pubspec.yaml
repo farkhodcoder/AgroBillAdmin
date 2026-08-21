@@ -70,6 +70,11 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^6.0.0
 
+  # Testda easy_localization ni ishga tushirish uchun: u locale ni
+  # SharedPreferences da saqlaydi va testda mock qiymat berish kerak.
+  # Ilova kodida ishlatilmaydi.
+  shared_preferences: ^2.3.3
+
 flutter:
   uses-material-design: true
 

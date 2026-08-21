@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_dimens.dart';
 import '../core/theme/app_typography.dart';
+import 'agro_mark.dart';
 
 /// Kirish oqimidagi barcha ekranlar uchun umumiy karkas.
 ///
@@ -92,20 +93,7 @@ class _Brand extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: colors.brandDeep,
-            borderRadius: AgRadius.rSm,
-          ),
-          child: Center(
-            child: Text(
-              'A',
-              style: AppTypography.h3.copyWith(color: colors.textInverse),
-            ),
-          ),
-        ),
+        const AgroMark(size: 32),
         const SizedBox(width: AgSpace.x3),
         Text(
           'app.title'.tr(),

@@ -22,30 +22,44 @@ class LanguageSwitch extends StatelessWidget {
     ('en', 'English'),
   ];
 
+  /// To'liq nomlar bilan tanlagich shuncha joy oladi (o'lchangan).
+  ///
+  /// Bundan tor joyda `Row` sig'may istisno ko'taradi va tugmalarni
+  /// QIRQADI — foydalanuvchi til tanlagichni topolmay qoladi. Shuning
+  /// uchun sig'masa qisqa kodlarga o'tamiz: "UZ RU EN" qirqilgan
+  /// "O'zbekch..." dan ancha yaxshi.
+  static const _fullLabelsWidth = 412.0;
+
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
     final current = context.locale.languageCode;
 
-    return Container(
-      padding: const EdgeInsets.all(AgSpace.x1),
-      decoration: BoxDecoration(
-        color: c.surfaceSunken,
-        borderRadius: AgRadius.rMd,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          for (final (code, label) in _languages)
-            _Option(
-              code: code,
-              label: compact ? code.toUpperCase() : label,
-              selected: code == current,
-              colors: c,
-            ),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final useCodes = compact || constraints.maxWidth < _fullLabelsWidth;
+
+        return Container(
+          padding: const EdgeInsets.all(AgSpace.x1),
+          decoration: BoxDecoration(
+            color: c.surfaceSunken,
+            borderRadius: AgRadius.rMd,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (final (code, label) in _languages)
+                _Option(
+                  code: code,
+                  label: useCodes ? code.toUpperCase() : label,
+                  selected: code == current,
+                  colors: c,
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

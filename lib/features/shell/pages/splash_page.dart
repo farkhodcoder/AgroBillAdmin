@@ -5,6 +5,7 @@ import '../../../core/supabase/admin_config.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimens.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../ui/agro_mark.dart';
 import '../../../ui/admin_feedback.dart';
 
 /// Sessiya tekshirilayotgan paytdagi ekran.
@@ -26,20 +27,7 @@ class SplashPage extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: c.brandDeep,
-                borderRadius: AgRadius.rMd,
-              ),
-              child: Center(
-                child: Text(
-                  'A',
-                  style: AppTypography.h2.copyWith(color: c.textInverse),
-                ),
-              ),
-            ),
+            const AgroMark(size: 40),
             const SizedBox(height: AgSpace.x5),
             Text(
               'app.title'.tr(),

@@ -2,10 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../core/theme/app_theme.dart';
 import '../core/theme/theme_controller.dart';
 import '../data/repositories/admin_auth_repository.dart';
 import '../features/auth/cubit/admin_auth_cubit.dart';
+import 'admin_material_app.dart';
 import 'di.dart';
 import 'router.dart';
 
@@ -50,20 +50,8 @@ class _AdminAppState extends State<AdminApp> {
         },
         child: ValueListenableBuilder<ThemeMode>(
           valueListenable: _theme,
-          builder: (context, themeMode, _) => MaterialApp.router(
-            title: 'AgroBill Admin',
-            debugShowCheckedModeBanner: false,
-
-            localizationsDelegates: context.localizationDelegates,
-            supportedLocales: context.supportedLocales,
-            locale: context.locale,
-
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
-            themeMode: themeMode,
-
-            routerConfig: _router,
-          ),
+          builder: (context, themeMode, _) =>
+              AdminMaterialApp(routerConfig: _router, themeMode: themeMode),
         ),
       ),
     );

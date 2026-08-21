@@ -7,6 +7,7 @@ import '../../../core/rbac/permission.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimens.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../ui/agro_mark.dart';
 import '../../auth/cubit/admin_auth_cubit.dart';
 import '../nav_items.dart';
 
@@ -140,20 +141,7 @@ class _Header extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: colors.brandDeep,
-              borderRadius: AgRadius.rSm,
-            ),
-            child: Center(
-              child: Text(
-                'A',
-                style: AppTypography.label.copyWith(color: colors.textInverse),
-              ),
-            ),
-          ),
+          const AgroMark(size: 28),
           if (!collapsed) ...[
             const SizedBox(width: AgSpace.x3),
             Expanded(
