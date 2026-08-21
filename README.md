@@ -171,7 +171,28 @@ powershell -File tool\check_web_secrets.ps1
 ```
 
 `check_web_secrets.ps1` — bundle ichida `service_role` kaliti, JWT yoki
-baza paroli qolmaganini tekshiradi (TTZ §11.2 oxirgi bandi).
+baza paroli qolmaganini tekshiradi. Ayni tekshiruv CI da ham takrorlanadi,
+ya'ni maxfiy kalit tushib qolgan build **deploy bo'lmaydi**.
+
+#### RBAC parity — nega ikki qavat
+
+[test/fixtures/rbac_seed.json](test/fixtures/rbac_seed.json) — `0016_seed_rbac.sql`
+dagi 24 ruxsat va 6 rol kodining nusxasi. Test uni ikki tomonga solishtiradi:
+
+| Solishtirish | Qachon ishlaydi |
+|---|---|
+| `permission.dart` == fixture | **har doim**, CI da ham |
+| fixture == `0016_seed_rbac.sql` | SQL mavjud bo'lsa (mahalliy) |
+
+Avval test to'g'ridan-to'g'ri SQL ga qarardi. Migratsiyalar mobil
+repozitoriyda turgani va CI faqat admin repozitoriysini checkout qilgani
+uchun fayl u yerda umuman yo'q edi — test o'zini **jimgina o'tkazib
+yuborardi**. Ya'ni "frontend kodi baza bilan mos" degan kafolat aynan kerak
+bo'lgan joyda, deploy oldidan, ishlamasdi. Buni CI jurnalidagi `(skipped)`
+belgisi ko'rsatdi.
+
+Fixture o'zgarganda uni SQL dan qayta yarating — ikkinchi test eskirganini
+darhol aytadi.
 
 ### Xavfsizlik testi — jonli bazaga qarshi
 
