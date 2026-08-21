@@ -1,0 +1,111 @@
+# =============================================================================
+# AgroBill Admin — GitHub Pages ga avtomatik joylashtirish.
+#
+# `main` ga har push da: tahlil -> testlar -> build -> Pages.
+# Testlar yiqilsa joylashtirish BAJARILMAYDI — buzuq panel efirga chiqmaydi.
+#
+# KALITLAR HAQIDA:
+# Bu yerdagi ikkala qiymat ham MAXFIY EMAS. `SUPABASE_PUBLISHABLE_KEY` —
+# brauzerga mo'ljallangan ochiq kalit; u JS to'plami ichida baribir ko'rinadi
+# va uni yashirishning imkoni yo'q. Ma'lumotni u emas, RLS siyosatlari va
+# `admin_has()` himoya qiladi. `service_role` kaliti esa bu loyihaga hech
+# qachon kiritilmaydi (`tool/check_web_secrets.ps1` shuni tekshiradi).
+# =============================================================================
+
+name: deploy
+
+on:
+  push:
+    branches: [main]
+  # Kod o'zgarmasa ham qayta joylashtirish kerak bo'lishi mumkin.
+  workflow_dispatch:
+
+# Pages uchun zarur minimal huquqlar — ortiqchasi berilmaydi.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Ketma-ket push larda oldingi deploy bekor qilinmaydi: yarim joylashtirilgan
+# sayt to'liq joylashtirilganidan yomonroq.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  SUPABASE_URL: https://qcpbholuttgmfojmpoct.supabase.co
+  SUPABASE_PUBLISHABLE_KEY: sb_publishable_ouSLSUWU8RM_a50kUeWSIQ_v2F67CQO
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Tahlil
+        run: flutter analyze
+
+      - name: Testlar
+        run: flutter test
+
+      # `--base-href` loyiha sayti uchun majburiy: sayt ildizda emas,
+      # `https://<user>.github.io/AgroBillAdmin/` da turadi. Usiz barcha
+      # resurs manzillari ildizga ishora qilib, sahifa bo'sh ochilardi.
+      - name: Build
+        run: |
+          flutter build web --release \
+            --base-href /AgroBillAdmin/ \
+            --dart-define=SUPABASE_URL=$SUPABASE_URL \
+            --dart-define=SUPABASE_PUBLISHABLE_KEY=$SUPABASE_PUBLISHABLE_KEY
+
+      # SPA FALLBACK.
+      #
+      # Ilova `usePathUrlStrategy()` ishlatadi, ya'ni marshrutlar
+      # `/AgroBillAdmin/users/<id>` ko'rinishida. GitHub Pages da qayta
+      # yozish qoidalari YO'Q — bunday manzilni to'g'ridan-to'g'ri ochganda
+      # yoki F5 bosganda 404 qaytardi. Pages 404 holatida `404.html` ni
+      # beradi, shuning uchun uni `index.html` nusxasi qilamiz: brauzer
+      # ilovani yuklaydi, go_router esa manzilni o'zi hal qiladi.
+      #
+      # Nusxa build DAN KEYIN olinadi — shundagina `$FLUTTER_BASE_HREF`
+      # o'rniga haqiqiy `/AgroBillAdmin/` yozilgan bo'ladi.
+      - name: SPA fallback (404.html)
+        run: cp build/web/index.html build/web/404.html
+
+      # Jekyll `_` bilan boshlanadigan fayllarni o'tkazib yuboradi.
+      # Flutter chiqishida bunday fayllar bor (`_redirects`), shuning uchun
+      # Jekyll ishlov berishini butunlay o'chiramiz.
+      - name: Jekyll ni o'chirish
+        run: touch build/web/.nojekyll
+
+      # Oxirgi to'siq: `service_role` yoki maxfiy kalit to'plamga tushib
+      # qolgan bo'lsa, deploy shu yerda to'xtaydi.
+      - name: Maxfiy kalit tekshiruvi
+        run: |
+          if grep -rIlE 'sb_secret_[A-Za-z0-9_-]{8,}|InNlcnZpY2Vfcm9sZSI|sbp_[a-f0-9]{40}|postgres(ql)?://' build/web; then
+            echo "::error::Build ichida maxfiy kalit topildi - deploy to'xtatildi"
+            exit 1
+          fi
+          echo "toza"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

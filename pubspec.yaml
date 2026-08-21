@@ -1,0 +1,103 @@
+name: agrobilladminpc_web
+description: "AgroBill Admin Control Center — platformani boshqarish paneli."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+
+# =============================================================================
+# Bog'liqliklar
+#
+# Versiyalar mobil ilova (`agrobill/pubspec.yaml`) bilan AYNAN BIR XIL.
+# Ikkala loyiha bitta bazaga va bitta `Result`/`AppFailure` naqshiga
+# tayanadi — versiyalar ajralib ketsa, nusxalangan core fayllar bir kunda
+# mos kelmay qoladi.
+#
+# Ataylab QO'SHILMAGAN: google_sign_in, camera, geolocator, speech_to_text,
+# pdf/printing, flutter_secure_storage. Birinchi beshtasi mobil funksiyalar;
+# oxirgisi web'da keraksiz — `supabase_flutter` sessiyani localStorage'da
+# o'zi saqlaydi.
+# =============================================================================
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  # Manzil qatoridan `#` ni olib tashlash uchun (`usePathUrlStrategy`).
+  # Bu loyiha faqat web uchun quriladi.
+  flutter_web_plugins:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Brauzer API lari — tema tanlovini localStorage da saqlash uchun.
+  # Sinxron o'qiladi, shuning uchun birinchi kadr to'g'ri temada chiziladi.
+  web: ^1.1.0
+
+  # Holat boshqaruvi — mobil ilovadagi kabi BLoC/Cubit (TTZ §4.1).
+  flutter_bloc: ^9.1.1
+  bloc: ^9.0.0
+  equatable: ^2.0.7
+
+  # Marshrutlash / DI
+  go_router: ^16.3.0
+  get_it: ^8.2.0
+
+  # Backend
+  supabase_flutter: ^2.10.4
+
+  # Til — uz/ru/en uchalasi ham majburiy (TTZ §9)
+  easy_localization: ^3.0.7
+  intl: ^0.20.2
+
+  # Grafiklar (Dashboard, Tahlil)
+  fl_chart: ^1.1.1
+
+  # Ikonkalar — mobil ilova bilan bir xil to'plam
+  lucide_icons_flutter: ^3.0.15
+
+  # SVG — 2-bosqichda TOTP QR kodi uchun ham ishlatiladi:
+  # Supabase `auth.mfa.enroll()` QR ni SVG MATNI sifatida qaytaradi,
+  # shuning uchun alohida QR paketi kerak emas.
+  flutter_svg: ^2.0.17
+
+  # Rasm (e'lon moderatsiyasi, skan natijalari)
+  cached_network_image: ^3.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/translations/
+
+  # Shriftlar mobil ilovadan ko'chirildi: sarlavhada Manrope, matnda Inter.
+  # Kirill va o'zbek lotini (ʻ U+02BB) to'liq qoplangan.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Inter-ExtraBold.ttf
+          weight: 800
+    - family: Manrope
+      fonts:
+        - asset: assets/fonts/Manrope-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Manrope-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Manrope-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Manrope-ExtraBold.ttf
+          weight: 800

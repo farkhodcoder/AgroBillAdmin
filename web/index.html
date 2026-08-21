@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <!--
+    Ilova ildizdan boshqa yo'lda joylashtirilsa (masalan `/admin/`), bu
+    qiymat `flutter build web --base-href /admin/` bilan almashtiriladi.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AgroBill platformasini boshqarish paneli">
+
+  <!-- Brauzer oynasining rangi. Yorug'/tungi rejimga moslashadi. -->
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F8F5">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B120D">
+
+  <!--
+    Admin panel — ichki vosita. Qidiruv tizimlariga tushishi shart emas.
+  -->
+  <meta name="robots" content="noindex, nofollow">
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="AgroBill Admin">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>AgroBill Admin</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /*
+      YUKLANISH EKRANI.
+
+      `main.dart.js` ~3.8 MB. Usiz foydalanuvchi sekin ulanishda bir necha
+      soniya OQ EKRAN ko'radi va sahifa buzilgan deb o'ylaydi. Bu blok
+      Flutter birinchi kadrni chizganda ("flutter-first-frame" hodisasi)
+      olib tashlanadi.
+
+      Ranglar `AppColors` bilan bir xil (`app_colors.dart`) — yuklanish
+      ekranidan ilovaga o'tish sezilmasligi kerak.
+    */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #F7F8F5;
+    }
+
+    #boot {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: #F7F8F5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      transition: opacity .25s ease;
+    }
+
+    #boot.done {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #boot .mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: #173B22;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    #boot .name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1A1D1B;
+    }
+
+    #boot .bar {
+      width: 140px;
+      height: 3px;
+      border-radius: 999px;
+      background: #E3E6E1;
+      overflow: hidden;
+    }
+
+    #boot .bar span {
+      display: block;
+      width: 40%;
+      height: 100%;
+      border-radius: 999px;
+      background: #2E7D32;
+      animation: slide 1.1s ease-in-out infinite;
+    }
+
+    @keyframes slide {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
+
+    /* Harakatni kamaytirish so'ralgan bo'lsa animatsiya to'xtaydi. */
+    @media (prefers-reduced-motion: reduce) {
+      #boot .bar span { animation: none; width: 100%; }
+    }
+
+    /*
+      Tema uch holatda bo'ladi: OS sozlamasi (data-theme yo'q), yoki
+      foydalanuvchi ThemeSwitch orqali aniq tanlagan yorug'/qorong'i
+      (data-theme o'rnatilgan).
+
+      Media so'rovi :not([data-theme="light"]) bilan himoyalangan, aks holda
+      OS qorong'i bo'lgan mashinada foydalanuvchi YORUG' ni tanlasa yuklanish
+      ekrani baribir qora chiqib, keyin oqqa sakrardi.
+    */
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme="light"]),
+      html:not([data-theme="light"]) body,
+      html:not([data-theme="light"]) #boot { background: #0B120D; }
+      html:not([data-theme="light"]) #boot .name { color: #E8EDE9; }
+      html:not([data-theme="light"]) #boot .bar { background: #1F2C23; }
+    }
+
+    html[data-theme="dark"],
+    html[data-theme="dark"] body,
+    html[data-theme="dark"] #boot { background: #0B120D; }
+    html[data-theme="dark"] #boot .name { color: #E8EDE9; }
+    html[data-theme="dark"] #boot .bar { background: #1F2C23; }
+  </style>
+
+  <script>
+    // Bo'yashdan OLDIN ishlashi shart: ThemeController saqlagan tanlovni
+    // o'qib <html> ga qo'yadi. Usiz Flutter yuklanguncha yuklanish ekrani
+    // OS temasida turib, keyin tanlangan temaga sakrardi.
+    //
+    // Kalit theme_controller.dart dagi _storageKey bilan bir xil bo'lishi
+    // SHART — ikkalasi ayni bitta qiymatni o'qiydi.
+    (function () {
+      try {
+        var t = window.localStorage.getItem('agrobill.admin.theme');
+        if (t === 'light' || t === 'dark') {
+          document.documentElement.setAttribute('data-theme', t);
+        }
+      } catch (e) {
+        // Saqlash o'chirilgan brauzer — OS temasida qolamiz.
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div id="boot">
+    <div class="mark">A</div>
+    <div class="name">AgroBill Admin</div>
+    <div class="bar"><span></span></div>
+  </div>
+
+  <script>
+    // Flutter birinchi kadrni chizganda yuklanish ekrani olib tashlanadi.
+    // `setTimeout` — o'tish animatsiyasi tugashini kutadi, aks holda
+    // element birdan yo'qolib, sakrash sezilardi.
+    window.addEventListener('flutter-first-frame', function () {
+      var boot = document.getElementById('boot');
+      if (!boot) return;
+      boot.classList.add('done');
+      setTimeout(function () { boot.remove(); }, 300);
+    });
+  </script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

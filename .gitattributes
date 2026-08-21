@@ -1,0 +1,13 @@
+# Barcha matnli fayllar repozitoriyda LF bilan saqlanadi.
+#
+# Windows'da ishlanadi, lekin CI ubuntu'da ishlaydi. `deploy.yml` ichidagi
+# `run: |` bloklari bash uchun `\` bilan davom etadi — agar fayl CRLF bilan
+# saqlansa, bash `\` dan keyingi `\r` ni ko'rib davomni tanimay qolardi.
+* text=auto eol=lf
+
+# Ikkilik fayllar — o'girish qat'iyan yaroqsiz.
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.ttf  binary
+*.otf  binary

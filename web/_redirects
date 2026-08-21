@@ -1,0 +1,12 @@
+# Netlify / Cloudflare Pages — SPA fallback.
+#
+# Ilova `usePathUrlStrategy()` ishlatadi (main.dart), ya'ni marshrutlar
+# `/dashboard`, `/users` ko'rinishida, `#` siz. Bunday yo'l uchun serverda
+# HECH QANDAY FAYL YO'Q — u faqat brauzerdagi router uchun mavjud.
+#
+# Bu qator bo'lmasa: `/dashboard` ni yangilash yoki havolani to'g'ridan-
+# to'g'ri ochish 404 beradi. Bosh sahifadan navigatsiya esa ishlayveradi,
+# shuning uchun muammo sinovda oson e'tibordan qoladi.
+#
+# `200` (301 emas): manzil o'zgarmaydi, router uni o'zi o'qiydi.
+/*    /index.html   200
