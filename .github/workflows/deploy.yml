@@ -95,7 +95,12 @@ jobs:
           fi
           echo "toza"
 
+      #  — Pages ni ish oqimining o'zi yoqadi.
+      # Usiz repozitoriyda qo'lda «Settings -> Pages -> Source: GitHub
+      # Actions» qilish kerak bo'lardi va u qilinmaguncha       # har safar yiqilardi.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: build/web
