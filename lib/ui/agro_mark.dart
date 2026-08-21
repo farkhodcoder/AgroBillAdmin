@@ -16,6 +16,22 @@ class AgroMark extends StatelessWidget {
 
   final double size;
 
+  /// Barg konturi — ikki doira KESISHMASI.
+  ///
+  /// Ochiq, chunki `agro_mark_test.dart` uni to'g'ridan-to'g'ri sinaydi:
+  /// chizmani ko'z bilan tekshirib bo'lmaydi, lekin nuqta bargning ichidami
+  /// yoki tashqarisidami — buni aniq tekshirsa bo'ladi.
+  static Path leafPath(double side) {
+    final c = side / 2;
+    final r = 1.04 * c;
+    final d = 0.499 * c;
+    return Path.combine(
+      PathOperation.intersect,
+      Path()..addOval(Rect.fromCircle(center: Offset(c - d, c - d), radius: r)),
+      Path()..addOval(Rect.fromCircle(center: Offset(c + d, c + d), radius: r)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => SizedBox(
     width: size,
