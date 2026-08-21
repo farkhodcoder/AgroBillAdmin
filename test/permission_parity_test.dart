@@ -1,23 +1,65 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:agrobilladminpc_web/core/rbac/permission.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// `AdminPermission` va `AdminRole` — `0016_seed_rbac.sql` ning nusxasi.
+/// `AdminPermission` / `AdminRole` va `0016_seed_rbac.sql` mosligini
+/// kafolatlaydi.
 ///
 /// Nusxa asl bilan mos kelmasa xato JIM boʻladi: frontend menyu bandini
 /// koʻrsatadi, baza esa soʻrovni rad etadi va admin "nega ishlamayapti" deb
-/// qidiradi. Shuning uchun ikkalasi build vaqtida solishtiriladi.
+/// qidiradi.
 ///
-/// Migratsiyalar mobil repozitoriyda turadi (`agrobill/supabase/migrations/`),
-/// admin esa mustaqil loyiha — yoʻl nisbiy. Fayl topilmasa test OʻTKAZIB
-/// YUBORILADI, chunki papka koʻchirilgan boʻlishi mumkin va bu tarjima yoki
-/// kod xatosi emas.
+/// NEGA IKKI QAVAT (fixture + SQL):
+/// Migratsiyalar mobil repozitoriyda (`agrobill/supabase/migrations/`), admin
+/// esa mustaqil repozitoriy. CI faqat admin repozitoriysini checkout qiladi,
+/// ya'ni SQL fayli u yerda UMUMAN YOʻQ. Avval test shunday holatda oʻzini
+/// oʻtkazib yuborardi — natijada kafolat aynan kerak boʻlgan joyda, deploy
+/// oldidan, ishlamasdi. Buni CI jurnalidagi "(skipped)" koʻrsatdi.
+///
+/// Endi oraliqda `test/fixtures/rbac_seed.json` turadi:
+///   1-test (HAR DOIM, CI da ham): Dart kodi == fixture.
+///   2-test (SQL bor boʻlsa): fixture == SQL.
+/// Shunda CI haqiqiy tekshiruv oladi, mahalliy ishga tushirish esa
+/// fixture eskirib qolmaganini ushlaydi.
 void main() {
+  final fixtureFile = File('test/fixtures/rbac_seed.json');
   final seed = File('../../agrobill/supabase/migrations/0016_seed_rbac.sql');
 
-  test('ruxsat kodlari 0016_seed_rbac.sql bilan bir xil', () {
+  late Set<String> fixturePermissions;
+  late Set<String> fixtureRoles;
+
+  setUpAll(() {
+    final json =
+        jsonDecode(fixtureFile.readAsStringSync()) as Map<String, dynamic>;
+    fixturePermissions = (json['permissions'] as List).cast<String>().toSet();
+    fixtureRoles = (json['roles'] as List).cast<String>().toSet();
+  });
+
+  test('ruxsat kodlari fixture bilan bir xil', () {
+    expect(fixturePermissions, hasLength(24));
+    expect(
+      AdminPermission.all.toSet(),
+      equals(fixturePermissions),
+      reason: 'permission.dart va rbac_seed.json mos kelmayapti',
+    );
+  });
+
+  test('rol kodlari fixture bilan bir xil', () {
+    expect(fixtureRoles, hasLength(6));
+    expect(
+      AdminRole.all.toSet(),
+      equals(fixtureRoles),
+      reason: 'permission.dart va rbac_seed.json mos kelmayapti',
+    );
+  });
+
+  test('fixture 0016_seed_rbac.sql bilan bir xil', () {
     if (!seed.existsSync()) {
+      // Faqat CI da kutiladi. Mahalliy ishga tushirishda bu skip koʻrinsa,
+      // demak mobil repozitoriy koʻchirilgan — yoʻlni tuzating, aks holda
+      // fixture jimgina eskirib boradi.
       markTestSkipped('0016_seed_rbac.sql topilmadi: ${seed.path}');
       return;
     }
@@ -25,36 +67,32 @@ void main() {
     final sql = seed.readAsStringSync();
 
     // `insert into admin_permissions (...) values` blokidagi birinchi ustun.
-    final block = _between(sql, 'insert into admin_permissions', 'on conflict');
-    final fromSql = RegExp(
-      r"\('([a-z]+\.[a-z_]+)'",
-    ).allMatches(block).map((m) => m.group(1)!).toSet();
-
-    expect(fromSql, isNotEmpty, reason: 'SQL dan ruxsat kodlari oʻqilmadi');
-    expect(
-      AdminPermission.all.toSet(),
-      equals(fromSql),
-      reason: 'permission.dart va 0016_seed_rbac.sql mos kelmayapti',
+    final permBlock = _between(
+      sql,
+      'insert into admin_permissions',
+      'on conflict',
     );
-  });
+    final permsFromSql = RegExp(
+      r"\('([a-z]+\.[a-z_]+)'",
+    ).allMatches(permBlock).map((m) => m.group(1)!).toSet();
 
-  test('rol kodlari 0016_seed_rbac.sql bilan bir xil', () {
-    if (!seed.existsSync()) {
-      markTestSkipped('0016_seed_rbac.sql topilmadi: ${seed.path}');
-      return;
-    }
-
-    final sql = seed.readAsStringSync();
-    final block = _between(sql, 'insert into admin_roles', 'on conflict');
-    final fromSql = RegExp(
+    final roleBlock = _between(sql, 'insert into admin_roles', 'on conflict');
+    final rolesFromSql = RegExp(
       r"\('([a-z_]+)',",
-    ).allMatches(block).map((m) => m.group(1)!).toSet();
+    ).allMatches(roleBlock).map((m) => m.group(1)!).toSet();
 
-    expect(fromSql, isNotEmpty, reason: 'SQL dan rol kodlari oʻqilmadi');
+    expect(permsFromSql, isNotEmpty, reason: 'SQL dan ruxsat oʻqilmadi');
+    expect(rolesFromSql, isNotEmpty, reason: 'SQL dan rol oʻqilmadi');
+
     expect(
-      AdminRole.all.toSet(),
-      equals(fromSql),
-      reason: 'permission.dart va 0016_seed_rbac.sql mos kelmayapti',
+      fixturePermissions,
+      equals(permsFromSql),
+      reason: 'rbac_seed.json eskirgan — SQL dan qayta yarating',
+    );
+    expect(
+      fixtureRoles,
+      equals(rolesFromSql),
+      reason: 'rbac_seed.json eskirgan — SQL dan qayta yarating',
     );
   });
 

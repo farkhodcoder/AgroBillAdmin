@@ -1,0 +1,36 @@
+{
+  "permissions": [
+    "admin.read",
+    "admin.write",
+    "ai.moderate",
+    "ai.read",
+    "analytics.read",
+    "audit.read",
+    "content.read",
+    "content.write",
+    "disease.read",
+    "disease.write",
+    "farms.read",
+    "farms.write",
+    "listings.delete",
+    "listings.moderate",
+    "listings.read",
+    "notifications.send",
+    "orders.read",
+    "orders.write",
+    "settings.write",
+    "support.read",
+    "support.write",
+    "users.block",
+    "users.read",
+    "users.write"
+  ],
+  "roles": [
+    "admin",
+    "analyst",
+    "content_manager",
+    "moderator",
+    "super_admin",
+    "support_agent"
+  ]
+}
