@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/errors/admin_error_codes.dart';
+import '../../../core/i18n/admin_locales.dart';
 import '../../../core/rbac/permission.dart';
 import '../../../core/supabase/db.dart';
 import '../../../core/utils/result.dart';
@@ -87,8 +88,13 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
   }
 
   /// Interfeys tilini o'zgartiradi va bazaga saqlaydi.
+  ///
+  /// [languageCode] — `admin_users.language_code` dagi ko'rinish
+  /// (`uz`, `uz-Cyrl`, `ru`, `en`, `tr`). `Locale(languageCode)` to'g'ridan
+  /// to'g'ri ishlatilmaydi: `uz-Cyrl` uchun u yaroqsiz lokal yasaydi va
+  /// tarjima fayli topilmaydi.
   Future<void> changeLanguage(BuildContext context, String languageCode) async {
-    await context.setLocale(Locale(languageCode));
+    await context.setLocale(AdminLocales.localeFor(languageCode));
     // Xodim bo'lmasa saqlaydigan qator ham yo'q — faqat sessiya tili.
     if (!state.isReady) return;
 

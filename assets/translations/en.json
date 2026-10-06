@@ -94,7 +94,7 @@
       "col_title": "Campaign",
       "create": "Create campaign",
       "empty": "No campaigns",
-      "no_push_note": "NO PUSH IS SENT: the mobile app has no FCM wired up (no `firebase_messaging` dependency), so `device_tokens` is empty. A campaign arrives as an IN-APP notification — users see it on their Notifications screen.",
+      "no_push_note": "Push is wired up now (`firebase_messaging` + `send-push`). A campaign goes out both as an IN-APP notification and as a device notification; the device one only arrives if the user installed the build with push and signed in — that is when `device_tokens` fills up.",
       "recipients": "{} users",
       "send": "Send",
       "send_confirm": "{} users will receive this notification: \"{}\". This cannot be undone.",
@@ -351,7 +351,7 @@
     },
     "settings": {
       "change": "Change",
-      "mobile_note": "NOTE: the mobile app does NOT read this table yet — the values are compile-time constants in `supabase_config.dart`. Changing them here has no effect on the app (TTZ §6.15, P1).",
+      "mobile_note": "NOTE: the mobile app reads this table through the `ai_limits` RPC (0035) — changing the `ai.*` values affects the app immediately. The other keys are used server-side only.",
       "subtitle": "System parameters",
       "updated": "{} · {}",
       "value": "Value"

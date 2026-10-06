@@ -3,14 +3,26 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// TTZ §9: uchala tildagi kalitlar toʻplami AYNAN BIR XIL boʻlishi shart.
+/// TTZ §9: BARCHA tillardagi kalitlar toʻplami AYNAN BIR XIL boʻlishi shart.
 ///
 /// Yetishmagan kalit runtime'da xatoga olib kelmaydi — `easy_localization`
 /// oddiygina RAW KALITNI ekranga chiqaradi (`admin.errors.not_found`). Bu
 /// faqat oʻsha til tanlanganda koʻrinadi, ya'ni odatda releasedan keyin.
 /// Shuning uchun tekshiruv build vaqtida bajariladi.
+///
+/// Roʻyxat PAPKADAN oʻqiladi, qattiq yozilmaydi. Ilgari u `['uz','ru','en']`
+/// edi va `uz-Cyrl.json` bilan `tr.json` qoʻshilganda ikkisi ham tekshiruvdan
+/// TUSHIB QOLGAN edi — ya'ni test oʻzi ogohlantirgan jim xatoga yoʻl
+/// qoʻyardi.
 void main() {
-  const locales = ['uz', 'ru', 'en'];
+  final locales =
+      Directory('assets/translations')
+          .listSync()
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.json'))
+          .map((f) => f.uri.pathSegments.last.replaceAll('.json', ''))
+          .toList()
+        ..sort();
 
   late final Map<String, Set<String>> keysByLocale;
 
@@ -26,7 +38,10 @@ void main() {
     };
   });
 
-  test('uchala tilda kalitlar toʻplami bir xil', () {
+  test('barcha tillarda kalitlar toʻplami bir xil', () {
+    // uz, uz-Cyrl, ru, en, tr
+    expect(locales, hasLength(greaterThanOrEqualTo(5)));
+
     final reference = keysByLocale['uz']!;
 
     for (final locale in locales.where((l) => l != 'uz')) {

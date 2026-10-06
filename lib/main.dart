@@ -4,6 +4,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'app/app.dart';
 import 'app/di.dart';
+import 'core/i18n/admin_locales.dart';
 import 'core/supabase/db.dart';
 
 Future<void> main() async {
@@ -23,10 +24,14 @@ Future<void> main() async {
 
   runApp(
     EasyLocalization(
-      // TTZ §9: uchala til ham majburiy.
-      supportedLocales: const [Locale('uz'), Locale('ru'), Locale('en')],
+      // TTZ §9: o'zbek, rus va ingliz majburiy. Kirill yozuvi va turkcha
+      // keyin qo'shildi — ro'yxat `AdminLocales` da, uch joyda takrorlanmasin.
+      supportedLocales: AdminLocales.supported,
       path: 'assets/translations',
-      fallbackLocale: const Locale('uz'),
+      fallbackLocale: AdminLocales.uz,
+      // `uz-Cyrl.json` shu bayroq bilan yuklanadi: u mamlakat kodini tashlaydi,
+      // lekin yozuv kodini (`scriptCode`) SAQLAYDI.
+      useOnlyLangCode: true,
       child: const AdminApp(),
     ),
   );

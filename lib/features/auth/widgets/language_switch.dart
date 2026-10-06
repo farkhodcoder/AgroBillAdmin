@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../core/i18n/admin_locales.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimens.dart';
 import '../../../core/theme/app_typography.dart';
@@ -16,24 +17,22 @@ class LanguageSwitch extends StatelessWidget {
 
   final bool compact;
 
-  static const _languages = [
-    ('uz', "O'zbekcha"),
-    ('ru', 'Русский'),
-    ('en', 'English'),
-  ];
-
-  /// To'liq nomlar bilan tanlagich shuncha joy oladi (o'lchangan).
+  /// To'liq nomlar bilan tanlagich shuncha joy oladi.
   ///
   /// Bundan tor joyda `Row` sig'may istisno ko'taradi va tugmalarni
   /// QIRQADI — foydalanuvchi til tanlagichni topolmay qoladi. Shuning
-  /// uchun sig'masa qisqa kodlarga o'tamiz: "UZ RU EN" qirqilgan
+  /// uchun sig'masa qisqa kodlarga o'tamiz: "UZ ЎЗ РУ EN TR" qirqilgan
   /// "O'zbekch..." dan ancha yaxshi.
-  static const _fullLabelsWidth = 412.0;
+  ///
+  /// Qiymat til soniga bog'liq: uchta til uchun 412 edi, beshta uchun
+  /// kengaytirildi. Hisob qattiq yozilmaydi — `AdminLocales.all` o'zgarsa
+  /// chegara ham o'zi siljiydi.
+  static double get _fullLabelsWidth => 90.0 * AdminLocales.all.length + 32;
 
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
-    final current = context.locale.languageCode;
+    final current = context.locale;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -49,11 +48,11 @@ class LanguageSwitch extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              for (final (code, label) in _languages)
+              for (final option in AdminLocales.all)
                 _Option(
-                  code: code,
-                  label: useCodes ? code.toUpperCase() : label,
-                  selected: code == current,
+                  code: AdminLocales.tagFor(option.locale),
+                  label: useCodes ? option.short : option.label,
+                  selected: AdminLocales.sameLocale(option.locale, current),
                   colors: c,
                 ),
             ],

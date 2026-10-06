@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../core/i18n/admin_locales.dart';
 import '../core/theme/theme_controller.dart';
 import '../data/repositories/admin_auth_repository.dart';
 import '../features/auth/cubit/admin_auth_cubit.dart';
@@ -43,9 +44,12 @@ class _AdminAppState extends State<AdminApp> {
         listenWhen: (prev, next) =>
             prev.permissions.languageCode != next.permissions.languageCode,
         listener: (context, state) {
-          final code = state.permissions.languageCode;
-          if (context.locale.languageCode != code) {
-            context.setLocale(Locale(code));
+          // Solishtirish TO'LIQ lokal bo'yicha: `uz` va `uz-Cyrl` ikkalasida
+          // ham `languageCode` — `uz`, ya'ni faqat kod bo'yicha tekshirilsa
+          // kirillga o'tish jimgina o'tkazib yuborilardi.
+          final locale = AdminLocales.localeFor(state.permissions.languageCode);
+          if (!AdminLocales.sameLocale(context.locale, locale)) {
+            context.setLocale(locale);
           }
         },
         child: ValueListenableBuilder<ThemeMode>(

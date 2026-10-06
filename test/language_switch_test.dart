@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:agrobilladminpc_web/core/i18n/admin_locales.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -54,9 +55,10 @@ void main() {
 
     await tester.pumpWidget(
       EasyLocalization(
-        supportedLocales: const [Locale('uz'), Locale('ru'), Locale('en')],
+        supportedLocales: AdminLocales.supported,
         path: 'assets/translations',
-        fallbackLocale: const Locale('uz'),
+        fallbackLocale: AdminLocales.uz,
+        useOnlyLangCode: true,
         child: Builder(
           builder: (context) => BlocProvider.value(
             value: auth,
@@ -73,16 +75,25 @@ void main() {
     // --- 1. Ikkala tanlagich ham koʻrinadi -----------------------------
     expect(find.byType(LanguageSwitch), findsOneWidget);
     expect(find.byType(ThemeSwitch), findsOneWidget);
-    for (final label in ["O'zbekcha", 'Русский', 'English']) {
-      expect(find.text(label), findsOneWidget, reason: '$label koʻrinmayapti');
+    // Roʻyxat qattiq yozilmaydi: til qoʻshilganda test uni oʻzi qamrab
+    // oladi. Ilgari uchta nom sanab oʻtilgandi va `uz-Cyrl` bilan turkcha
+    // qoplamadan tushib qolardi.
+    expect(AdminLocales.all, hasLength(greaterThanOrEqualTo(5)));
+    for (final option in AdminLocales.all) {
+      expect(
+        find.text(option.label),
+        findsOneWidget,
+        reason: '${option.label} koʻrinmayapti',
+      );
     }
 
     // --- 2. Tor oynada qirqilmaydi -------------------------------------
     //
-    // Toʻliq nomlar ~412px joy oladi. Bundan tor joyda `Row` sigʻmay
-    // istisno koʻtarardi va tugmalarni QIRQARDI — foydalanuvchi til
-    // tanlagichni umuman topolmasdi. Vidjet testi overflow'ni xato deb
-    // hisoblaydi, shuning uchun regressiya darhol koʻrinadi.
+    // Toʻliq nomlar beshta til uchun ~480px joy oladi. Bundan tor joyda
+    // `Row` sigʻmay istisno koʻtarardi va tugmalarni QIRQARDI —
+    // foydalanuvchi til tanlagichni umuman topolmasdi. Vidjet testi
+    // overflow'ni xato deb hisoblaydi, shuning uchun regressiya darhol
+    // koʻrinadi.
     addTearDown(tester.view.reset);
     tester.view.physicalSize = const Size(320, 700);
     tester.view.devicePixelRatio = 1.0;
@@ -90,11 +101,13 @@ void main() {
 
     expect(find.byType(LanguageSwitch), findsOneWidget);
     expect(find.byType(ThemeSwitch), findsOneWidget);
-    expect(
-      find.text('RU'),
-      findsOneWidget,
-      reason: 'tor oynada qisqa kodlarga oʻtmadi',
-    );
+    for (final option in AdminLocales.all) {
+      expect(
+        find.text(option.short),
+        findsOneWidget,
+        reason: 'tor oynada ${option.short} qisqa belgisi koʻrinmadi',
+      );
+    }
 
     // --- 3. Bosilganda SAHIFA MATNI ham almashadi ----------------------
     //
@@ -104,7 +117,10 @@ void main() {
     // lekin ekrandagi barcha matn eski tilda qoladi.
     final titleBefore = tester.widget<Text>(find.byType(Text).first).data;
 
-    await tester.tap(find.text('RU'));
+    final russian = AdminLocales.all.firstWhere(
+      (o) => o.locale.languageCode == 'ru',
+    );
+    await tester.tap(find.text(russian.short));
     await tester.pumpAndSettle();
 
     expect(

@@ -94,7 +94,7 @@
       "col_title": "Kampaniya",
       "create": "Kampaniya yaratish",
       "empty": "Kampaniyalar yoʻq",
-      "no_push_note": "PUSH YUBORILMAYDI: mobil ilovada FCM ulanmagan (`firebase_messaging` bogʻliqligi yoʻq), shuning uchun `device_tokens` boʻsh. Kampaniya ILOVA ICHIDAGI bildirishnoma sifatida yetadi — foydalanuvchi uni \"Bildirishnomalar\" ekranida koʻradi.",
+      "no_push_note": "Push endi ulangan (`firebase_messaging` + `send-push`). Kampaniya ham ILOVA ICHIDA, ham qurilma bildirishnomasi boʻlib ketadi; qurilma bildirishnomasi faqat foydalanuvchi push bor versiyani oʻrnatib kirgan boʻlsa yetadi — `device_tokens` aynan shunda toʻladi.",
       "recipients": "{} ta foydalanuvchi",
       "send": "Yuborish",
       "send_confirm": "Bildirishnoma {} ta foydalanuvchiga yuboriladi: «{}». Bu amal qaytarilmaydi.",
@@ -351,7 +351,7 @@
     },
     "settings": {
       "change": "Oʻzgartirish",
-      "mobile_note": "DIQQAT: mobil ilova bu jadvalni hozircha OʻQIMAYDI — qiymatlar `supabase_config.dart` da compile-time const. Bu yerdan oʻzgartirilgan qiymat ilovaga taʼsir qilmaydi (TTZ §6.15, P1).",
+      "mobile_note": "ESLATMA: mobil ilova bu jadvalni `ai_limits` RPC orqali oʻqiydi (0035) — `ai.*` qiymatlarini oʻzgartirish ilovaga darhol taʼsir qiladi. Qolgan kalitlar faqat server tomonida ishlatiladi.",
       "subtitle": "Tizim parametrlari",
       "updated": "{} · {}",
       "value": "Qiymat"
