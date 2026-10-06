@@ -37,6 +37,39 @@ void main() {
       expect(perms.has(AdminPermission.settingsWrite), isFalse);
     });
 
+    test('founder — ruxsat roʻyxati boʻsh boʻlsa ham hammasi ochiq', () {
+      // Bazadagi `admin_has()` founder uchun qisqa tutashadi (0040), shuning
+      // uchun panel ham ro'yxatga qaramasligi kerak. Aks holda kelajakda
+      // qo'shilgan ruxsat uchun server "ha" deydi, panel esa tugmani
+      // yashiradi — egasi "nega ishlamayapti" deb qidiradi.
+      const perms = AdminPermissions(
+        roleCode: AdminRole.founder,
+        codes: <String>{},
+      );
+
+      expect(perms.isFounder, isTrue);
+      expect(perms.isStaff, isTrue);
+
+      for (final code in AdminPermission.all) {
+        expect(perms.has(code), isTrue, reason: '$code founderga berilmadi');
+      }
+
+      // Hali mavjud boʻlmagan kod ham — aynan shu holat `super_admin` da
+      // buziladi, chunki uning roʻyxati 0016 da qotib qolgan.
+      expect(perms.has('kelasi.yangi_ruxsat'), isTrue);
+    });
+
+    test('super_admin — founder emas', () {
+      const perms = AdminPermissions(
+        roleCode: AdminRole.superAdmin,
+        codes: {AdminPermission.usersRead},
+      );
+
+      expect(perms.isFounder, isFalse);
+      expect(perms.has(AdminPermission.usersRead), isTrue);
+      expect(perms.has('kelasi.yangi_ruxsat'), isFalse);
+    });
+
     test('none() — xodim emas', () {
       const perms = AdminPermissions.none();
       expect(perms.isStaff, isFalse);

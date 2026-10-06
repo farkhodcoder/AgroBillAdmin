@@ -1,4 +1,4 @@
-import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 /// Admin panel formatlari.
 ///
@@ -24,6 +24,14 @@ abstract final class Fmt {
   static String hectares(num value) => _localize(_decimal.format(value));
 
   /// Pul — so'm. Katta sonlar qisqartiriladi, aks holda KPI kartaga sig'maydi.
+  /// E'lon narxi. `null` — V2 dagi "kelishuv asosida" (`price_mode`).
+  ///
+  /// [sum] dan alohida: u `num` kutadi va `null` ni qabul qilmaydi. Ilgari
+  /// model `null` ni **0 ga** aylantirardi, natijada kelishiladigan e'lon
+  /// panelda "0" bo'lib ko'rinardi — moderator uni tekin deb rad etardi.
+  static String price(double? value) =>
+      value == null ? 'admin.market.negotiable'.tr() : sum(value);
+
   static String sum(num value) {
     if (value >= 1000000000) {
       return '${_localize(_decimal.format(value / 1000000000))} mlrd';

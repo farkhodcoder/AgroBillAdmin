@@ -133,6 +133,14 @@ class UsersCubit extends Cubit<UsersState> {
   Future<bool> setRole(String userId, String? roleCode, String reason) =>
       _action(() => _repo.setRole(userId, roleCode, reason));
 
+  /// Barcha sessiyalarni uzadi — akkaunt saqlanadi.
+  Future<bool> forceLogout(String userId, String reason) =>
+      _action(() => _repo.forceLogout(userId, reason));
+
+  /// Akkauntni butunlay o'chiradi. Qaytarib bo'lmaydi.
+  Future<bool> deleteAccount(String userId, String reason) =>
+      _action(() => _repo.deleteAccount(userId, reason));
+
   /// Amal bajaradi va ro'yxatni yangilaydi.
   ///
   /// `true` qaytsa amal o'tdi. Xato bo'lsa `actionFailure` da qoladi va

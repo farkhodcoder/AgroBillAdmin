@@ -273,6 +273,63 @@ class _Actions extends StatelessWidget {
             onPressed: () => _pickRole(context, cubit),
           ),
         ),
+
+        const SizedBox(height: AgSpace.x3),
+
+        // Sessiyalarni uzish — o'chirishdan yumshoq chora. Parol sizib
+        // chiqqan deb gumon qilinsa akkauntni yo'qotmasdan kirish to'xtaydi.
+        PermissionGuard(
+          permission: AdminPermission.usersWrite,
+          fallback: const SizedBox.shrink(),
+          child: AdminButton(
+            label: 'admin.users.force_logout'.tr(),
+            kind: AdminButtonKind.secondary,
+            size: AdminButtonSize.large,
+            expand: true,
+            icon: Icons.logout,
+            onPressed: () async {
+              final result = await showReasonDialog(
+                context,
+                title: 'admin.users.force_logout'.tr(),
+                message: 'admin.users.force_logout_confirm'.tr(
+                  args: [row.fullName],
+                ),
+                confirmLabel: 'admin.users.force_logout'.tr(),
+              );
+              if (!result.confirmed || result.reason == null) return;
+              await cubit.forceLogout(row.id, result.reason!);
+            },
+          ),
+        ),
+
+        const SizedBox(height: AgSpace.x3),
+
+        // Butunlay o'chirish — `users.delete` (0040). Founder va har qanday
+        // xodim o'chirilmaydi: bu shart bazada (`admin_can_delete_user`),
+        // shuning uchun tugma ko'rinsa ham begona qatorga tegib ketmaydi.
+        PermissionGuard(
+          permission: AdminPermission.usersDelete,
+          fallback: const SizedBox.shrink(),
+          child: AdminButton(
+            label: 'admin.users.delete'.tr(),
+            kind: AdminButtonKind.danger,
+            size: AdminButtonSize.large,
+            expand: true,
+            icon: Icons.delete_forever_outlined,
+            onPressed: () async {
+              final result = await showReasonDialog(
+                context,
+                title: 'admin.users.delete'.tr(),
+                message: 'admin.users.delete_confirm'.tr(
+                  args: [row.fullName],
+                ),
+                confirmLabel: 'admin.users.delete'.tr(),
+              );
+              if (!result.confirmed || result.reason == null) return;
+              await cubit.deleteAccount(row.id, result.reason!);
+            },
+          ),
+        ),
       ],
     );
   }

@@ -32,6 +32,22 @@ abstract final class AdminErrorCode {
   /// O'z rolini o'zgartirish taqiqlangan (imtiyoz oshirish).
   static const cannotChangeOwnRole = 'CANNOT_CHANGE_OWN_ROLE';
 
+  /// Founder qatoriga faqat founder tega oladi (0040).
+  static const cannotChangeFounder = 'CANNOT_CHANGE_FOUNDER';
+
+  /// `founder` rolini faqat founder beradi (0040).
+  static const onlyFounderGrantsFounder = 'ONLY_FOUNDER_GRANTS_FOUNDER';
+
+  /// O'z akkauntini o'chirish (`admin_can_delete_user`, 0040).
+  static const cannotDeleteSelf = 'CANNOT_DELETE_SELF';
+
+  /// Founder akkaunti o'chirilmaydi (0040).
+  static const cannotDeleteFounder = 'CANNOT_DELETE_FOUNDER';
+
+  /// Xodimni o'chirish uchun avval roli olib tashlanishi kerak — shunda
+  /// `admin_set_role` audit yozuvini qoldiradi va amal ikki qadam bo'ladi.
+  static const targetIsStaff = 'TARGET_IS_STAFF';
+
   /// Kirish jurnaliga (`admin_login_events.failure_code`) yoziladigan kodlar.
   /// Ular baza tomonidan qaytarilmaydi — frontend yozadi, shuning uchun
   /// `_map` da yo'q.
@@ -61,6 +77,23 @@ abstract final class AdminErrorCode {
       FailureKind.permission,
       'admin.errors.cannot_change_own_role',
     ),
+    cannotChangeFounder: (
+      FailureKind.permission,
+      'admin.errors.cannot_change_founder',
+    ),
+    onlyFounderGrantsFounder: (
+      FailureKind.permission,
+      'admin.errors.only_founder_grants_founder',
+    ),
+    cannotDeleteSelf: (
+      FailureKind.permission,
+      'admin.errors.cannot_delete_self',
+    ),
+    cannotDeleteFounder: (
+      FailureKind.permission,
+      'admin.errors.cannot_delete_founder',
+    ),
+    targetIsStaff: (FailureKind.permission, 'admin.errors.target_is_staff'),
     invalidRole: (FailureKind.validation, 'admin.errors.invalid_role'),
     invalidStatus: (FailureKind.validation, 'admin.errors.invalid_status'),
     invalidValue: (FailureKind.validation, 'admin.errors.invalid_value'),

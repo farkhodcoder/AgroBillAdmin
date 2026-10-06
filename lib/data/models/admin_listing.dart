@@ -36,6 +36,24 @@ abstract final class ListingStatus {
       status == rejected || status == changesRequested || status == suspended;
 }
 
+/// E'lon turi (`listings.kind`, V2 BOZ-03).
+///
+/// Ijara faqat texnika va yer joy uchun — cheklov bazada ham bor.
+abstract final class ListingKind {
+  static const sale = 'sale';
+  static const rent = 'rent';
+
+  static const all = <String>[sale, rent];
+}
+
+/// Narx rejimi (`listings.price_mode`, V2 BOZ-04).
+///
+/// `negotiable` da `price` NULL bo'ladi — `fixed` da esa musbat.
+abstract final class PriceMode {
+  static const fixed = 'fixed';
+  static const negotiable = 'negotiable';
+}
+
 /// E'lon ro'yxati qatori.
 class AdminListingRow {
   const AdminListingRow({
@@ -43,6 +61,8 @@ class AdminListingRow {
     required this.title,
     required this.status,
     required this.price,
+    required this.priceMode,
+    required this.kind,
     required this.quantity,
     required this.unit,
     required this.category,
@@ -86,7 +106,13 @@ class AdminListingRow {
       id: json['id'] as String,
       title: json['title'] as String? ?? '',
       status: json['status'] as String? ?? ListingStatus.pending,
-      price: _num(json['price']),
+      // V2 dan beri `price` NULL bo'la oladi ("kelishuv asosida"). Ilgari
+      // bu yerda `_num(...)` turardi va NULL ni **0 ga** aylantirardi: panel
+      // kelishiladigan e'lonni "0 so'm" deb ko'rsatardi, moderator esa uni
+      // tekin deb rad etardi.
+      price: _nullableNum(json['price']),
+      priceMode: json['price_mode'] as String? ?? PriceMode.fixed,
+      kind: json['kind'] as String? ?? ListingKind.sale,
       quantity: _num(json['quantity']),
       unit: json['unit'] as String? ?? 'kg',
       category: json['category'] as String? ?? '',
@@ -107,7 +133,12 @@ class AdminListingRow {
   final String id;
   final String title;
   final String status;
-  final double price;
+
+  /// `null` — kelishuv asosida (`priceMode == PriceMode.negotiable`).
+  final double? price;
+
+  final String priceMode;
+  final String kind;
   final double quantity;
   final String unit;
   final String category;
@@ -125,10 +156,23 @@ class AdminListingRow {
   /// `listing_images.storage_path` — signed URL alohida olinadi.
   final List<String> imagePaths;
 
+  /// Kelishiladigan narx uchun `null`.
+  ///
+  /// Shuningdek `rent` e'lonlarda narx oylik bo'ladi — bu yerda farq yo'q,
+  /// ko'rsatishda [kind] hisobga olinadi.
+  bool get isNegotiable => price == null;
+
   static double _num(Object? v) => switch (v) {
     num n => n.toDouble(),
     String s => double.tryParse(s) ?? 0,
     _ => 0,
+  };
+
+  /// `_num` dan farqi: NULL ni 0 ga aylantirmaydi.
+  static double? _nullableNum(Object? v) => switch (v) {
+    num n => n.toDouble(),
+    String s => double.tryParse(s),
+    _ => null,
   };
 }
 

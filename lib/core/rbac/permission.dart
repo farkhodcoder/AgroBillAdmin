@@ -1,8 +1,8 @@
 /// Ruxsat va rol kodlari.
 ///
-/// Bu ro'yxat `supabase/migrations/0016_seed_rbac.sql` ning AYNAN NUSXASI.
-/// Biri o'zgarsa ikkinchisi ham o'zgarishi shart — `permission_parity_test`
-/// buni tekshiradi.
+/// Bu ro'yxat `supabase/migrations/0016_seed_rbac.sql` va `0040_founder_role.sql`
+/// ning AYNAN NUSXASI. Biri o'zgarsa ikkinchisi ham o'zgarishi shart —
+/// `permission_parity_test` buni tekshiradi.
 ///
 /// MUHIM: bu yerdagi tekshiruvlar faqat UX uchun — kerak bo'lmagan menyu
 /// bandini yashirish, tugmani o'chirish. HAQIQIY HIMOYA bazada:
@@ -10,12 +10,19 @@
 /// chetlab o'tish hech narsa bermaydi, chunki so'rovni server rad etadi.
 library;
 
-/// 24 ta ruxsat kodi.
+/// 25 ta ruxsat kodi.
 abstract final class AdminPermission {
   // users
   static const usersRead = 'users.read';
   static const usersWrite = 'users.write';
   static const usersBlock = 'users.block';
+
+  /// Akkauntni BUTUNLAY o'chirish (`admin-delete-user`).
+  ///
+  /// `usersWrite` dan ataylab ajratilgan: profilni tahrirlashni qaytarish
+  /// mumkin, `auth.admin.deleteUser()` ni esa yo'q. 0040 ga qadar o'chirish
+  /// `users.write` ga tayanardi, ya'ni ism tuzatish bilan bir darajada edi.
+  static const usersDelete = 'users.delete';
 
   // farms
   static const farmsRead = 'farms.read';
@@ -70,6 +77,7 @@ abstract final class AdminPermission {
     usersRead,
     usersWrite,
     usersBlock,
+    usersDelete,
     farmsRead,
     farmsWrite,
     listingsRead,
@@ -94,8 +102,16 @@ abstract final class AdminPermission {
   ];
 }
 
-/// 6 ta tizim roli (`admin_roles` jadvali).
+/// 7 ta tizim roli (`admin_roles` jadvali).
 abstract final class AdminRole {
+  /// Loyiha egasi — BARCHA ruxsatlarga ega.
+  ///
+  /// Ruxsatlari sanab o'tilmaydi: bazadagi `admin_has()` founder uchun qisqa
+  /// tutashadi, shuning uchun kelajakda qo'shiladigan ruxsat ham avtomatik
+  /// tegishli bo'ladi. `super_admin` bunday emas — uning ro'yxati 0016 da
+  /// qotib qolgan va har bir yangi ruxsatni qo'lda berish kerak.
+  static const founder = 'founder';
+
   static const superAdmin = 'super_admin';
   static const admin = 'admin';
   static const moderator = 'moderator';
@@ -104,6 +120,7 @@ abstract final class AdminRole {
   static const analyst = 'analyst';
 
   static const all = <String>[
+    founder,
     superAdmin,
     admin,
     moderator,
@@ -138,9 +155,18 @@ class AdminPermissions {
   /// — admin boshqa kompyuterdan kirsa ham o'z tili qoladi (TTZ §9).
   final String languageCode;
 
-  bool get isStaff => roleCode != null && codes.isNotEmpty;
+  /// Loyiha egasi.
+  ///
+  /// Bazadagi `is_founder()` ning nusxasi. Founder uchun ruxsat ro'yxati
+  /// umuman o'qilmaydi — [has] har doim `true`.
+  bool get isFounder => roleCode == AdminRole.founder;
 
-  bool has(String permission) => codes.contains(permission);
+  bool get isStaff => roleCode != null && (isFounder || codes.isNotEmpty);
+
+  /// Founder uchun har doim `true` — bazadagi `admin_has()` bilan bir xil
+  /// qoida. Aks holda panel yangi ruxsatli tugmani yashirardi, server esa
+  /// so'rovni qabul qilardi: egasi "nega tugma yo'q" deb qidirardi.
+  bool has(String permission) => isFounder || codes.contains(permission);
 
   /// Berilganlardan hech bo'lmasa bittasi bormi (masalan menyu bandi bir
   /// nechta ruxsat bilan ochiladigan bo'lsa).

@@ -242,7 +242,16 @@ class _Facts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = <(String, String)>[
-      ('admin.market.col_price', Fmt.sum(listing.price)),
+      ('admin.market.col_price', Fmt.price(listing.price)),
+      // Sotuv/ijara farqi narxni butunlay boshqacha o'qitadi: ijarada u
+      // oylik to'lov. Moderator buni ko'rmasa narxni noto'g'ri baholaydi.
+      (
+        'admin.market.col_kind',
+        (listing.kind == ListingKind.rent
+                ? 'admin.market.kind_rent'
+                : 'admin.market.kind_sale')
+            .tr(),
+      ),
       (
         'admin.market.quantity',
         '${Fmt.decimal(listing.quantity)} ${listing.unit}',

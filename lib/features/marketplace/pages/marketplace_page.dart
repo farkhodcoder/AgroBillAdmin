@@ -173,7 +173,7 @@ class _MarketplaceView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            Fmt.sum(row.price),
+            Fmt.price(row.price),
             style: AppTypography.bodySmall.copyWith(color: c.text),
           ),
           Text(

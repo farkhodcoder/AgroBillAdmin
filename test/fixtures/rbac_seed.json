@@ -22,6 +22,7 @@
     "support.read",
     "support.write",
     "users.block",
+    "users.delete",
     "users.read",
     "users.write"
   ],
@@ -29,6 +30,7 @@
     "admin",
     "analyst",
     "content_manager",
+    "founder",
     "moderator",
     "super_admin",
     "support_agent"

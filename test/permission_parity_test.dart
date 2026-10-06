@@ -25,7 +25,14 @@ import 'package:flutter_test/flutter_test.dart';
 /// fixture eskirib qolmaganini ushlaydi.
 void main() {
   final fixtureFile = File('test/fixtures/rbac_seed.json');
-  final seed = File('../../agrobill/supabase/migrations/0016_seed_rbac.sql');
+
+  // Rol va ruxsatlar IKKI migratsiyada: asosiy to'plam 0016 da, `founder`
+  // roli va `users.delete` 0040 da. Faqat 0016 o'qilsa test yangi kodlarni
+  // "ortiqcha" deb hisoblardi.
+  final seeds = [
+    File('../../agrobill/supabase/migrations/0016_seed_rbac.sql'),
+    File('../../agrobill/supabase/migrations/0040_founder_role.sql'),
+  ];
 
   late Set<String> fixturePermissions;
   late Set<String> fixtureRoles;
@@ -38,7 +45,7 @@ void main() {
   });
 
   test('ruxsat kodlari fixture bilan bir xil', () {
-    expect(fixturePermissions, hasLength(24));
+    expect(fixturePermissions, hasLength(25));
     expect(
       AdminPermission.all.toSet(),
       equals(fixturePermissions),
@@ -47,7 +54,7 @@ void main() {
   });
 
   test('rol kodlari fixture bilan bir xil', () {
-    expect(fixtureRoles, hasLength(6));
+    expect(fixtureRoles, hasLength(7));
     expect(
       AdminRole.all.toSet(),
       equals(fixtureRoles),
@@ -55,31 +62,41 @@ void main() {
     );
   });
 
-  test('fixture 0016_seed_rbac.sql bilan bir xil', () {
-    if (!seed.existsSync()) {
+  test('fixture migratsiyalar bilan bir xil', () {
+    final missing = seeds.where((f) => !f.existsSync()).toList();
+    if (missing.isNotEmpty) {
       // Faqat CI da kutiladi. Mahalliy ishga tushirishda bu skip koʻrinsa,
       // demak mobil repozitoriy koʻchirilgan — yoʻlni tuzating, aks holda
       // fixture jimgina eskirib boradi.
-      markTestSkipped('0016_seed_rbac.sql topilmadi: ${seed.path}');
+      markTestSkipped(
+        'migratsiya topilmadi: ${missing.map((f) => f.path).join(', ')}',
+      );
       return;
     }
 
-    final sql = seed.readAsStringSync();
+    final permsFromSql = <String>{};
+    final rolesFromSql = <String>{};
 
-    // `insert into admin_permissions (...) values` blokidagi birinchi ustun.
-    final permBlock = _between(
-      sql,
-      'insert into admin_permissions',
-      'on conflict',
-    );
-    final permsFromSql = RegExp(
-      r"\('([a-z]+\.[a-z_]+)'",
-    ).allMatches(permBlock).map((m) => m.group(1)!).toSet();
+    for (final seed in seeds) {
+      final sql = seed.readAsStringSync();
 
-    final roleBlock = _between(sql, 'insert into admin_roles', 'on conflict');
-    final rolesFromSql = RegExp(
-      r"\('([a-z_]+)',",
-    ).allMatches(roleBlock).map((m) => m.group(1)!).toSet();
+      // `insert into admin_permissions (...) values` blokidagi birinchi ustun.
+      final permBlock = _between(
+        sql,
+        'insert into admin_permissions',
+        'on conflict',
+      );
+      permsFromSql.addAll(
+        RegExp(
+          r"\('([a-z]+\.[a-z_]+)'",
+        ).allMatches(permBlock).map((m) => m.group(1)!),
+      );
+
+      final roleBlock = _between(sql, 'insert into admin_roles', 'on conflict');
+      rolesFromSql.addAll(
+        RegExp(r"\('([a-z_]+)',").allMatches(roleBlock).map((m) => m.group(1)!),
+      );
+    }
 
     expect(permsFromSql, isNotEmpty, reason: 'SQL dan ruxsat oʻqilmadi');
     expect(rolesFromSql, isNotEmpty, reason: 'SQL dan rol oʻqilmadi');

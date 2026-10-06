@@ -138,6 +138,28 @@ AppFailure mapSupabaseError(Object error) {
     );
   }
 
+  // Edge Function xatosi. `_shared/admin.ts` dagi `fail()` tanada `{"error":
+  // "CODE"}` qaytaradi va status 2xx bo'lmaydi — Supabase mijozi shuni
+  // `FunctionException` qilib ko'taradi.
+  //
+  // Bu tarmoq ilgari YO'Q edi: beshta funksiyaning (`admin-delete-user`,
+  // `admin-force-logout`, `admin-export`, `admin-send-campaign`,
+  // `admin-system-health`) har qanday xatosi pastdagi umumiy tarmoqqa tushib
+  // "Nomaʼlum xatolik" bo'lib ko'rinardi — ya'ni "founderni o'chirib
+  // bo'lmaydi" kabi aniq sabab admin'ga yetib bormasdi.
+  if (error is FunctionException) {
+    final details = error.details;
+    final code = details is Map ? details['error'] : null;
+    final known = AdminErrorCode.failureFrom(code?.toString());
+    if (known != null) return known;
+
+    return AppFailure(
+      FailureKind.unknown,
+      'admin.errors.server',
+      detail: 'status ${error.status}: $details',
+    );
+  }
+
   final text = error.toString().toLowerCase();
   if (text.contains('socketexception') ||
       text.contains('failed host lookup') ||

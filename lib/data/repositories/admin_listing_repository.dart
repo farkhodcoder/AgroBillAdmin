@@ -12,8 +12,11 @@ import '../models/admin_listing.dart';
 /// yozadi, sotuvchiga bildirishnoma yuboradi va auditga tushadi. To'g'ridan-
 /// to'g'ri `update listings` qilinsa shu to'rttadan uchtasi yo'qolardi.
 class AdminListingRepository {
+  // `price_mode` va `kind` — V2 (BOZ-03, BOZ-04). Ularsiz model `price_mode`
+  // ni `fixed` deb taxmin qilardi va kelishiladigan e'lon narxsiz ko'rinardi.
   static const _select =
-      'id, title, status, price, unit, quantity, category, description, '
+      'id, title, status, price, price_mode, kind, unit, quantity, '
+      'category, description, '
       'reject_reason, view_count, created_at, expires_at, '
       'profiles(id, full_name, email), '
       'regions(name_uz, name_ru, name_en), '

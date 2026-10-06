@@ -129,6 +129,35 @@ class AdminUserRepository {
     );
   });
 
+  /// Akkauntni BUTUNLAY o'chiradi (`admin-delete-user`).
+  ///
+  /// RPC emas, Edge Function: `auth.admin.deleteUser()` `service_role`
+  /// talab qiladi va uni mijozga berib bo'lmaydi.
+  ///
+  /// Kimni o'chirish mumkinligini funksiya o'zi bazadan tekshiradi
+  /// (`admin_can_delete_user`, 0040) — founder va xodim o'chirilmaydi.
+  /// Xato kodi tarjima kalitiga aylanadi, shuning uchun u o'zgartirilmasdan
+  /// qaytariladi.
+  Future<Result<void>> deleteAccount(String userId, String reason) =>
+      guard(() async {
+        await Db.client.functions.invoke(
+          'admin-delete-user',
+          body: {'user_id': userId, 'reason': reason},
+        );
+      });
+
+  /// Barcha sessiyalarni uzadi (`admin-force-logout`).
+  ///
+  /// O'chirishdan yumshoq chora: parol sizib chiqqan deb gumon qilinsa
+  /// akkauntni yo'qotmasdan kirishni to'xtatadi.
+  Future<Result<void>> forceLogout(String userId, String reason) =>
+      guard(() async {
+        await Db.client.functions.invoke(
+          'admin-force-logout',
+          body: {'user_id': userId, 'reason': reason},
+        );
+      });
+
   /// Foydalanuvchining faoliyat lentasi (`activity_log`).
   Future<Result<List<Map<String, dynamic>>>> activity(
     String userId, {
