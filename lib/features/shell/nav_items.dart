@@ -34,10 +34,9 @@ class NavGroup {
 
 /// Butun menyu tuzilishi.
 ///
-/// TTZ §6 dagi 15 modul. Hozircha faqat Dashboard ekrani bor — qolganlari
-/// tegishli bosqichda ulanadi va shu ro'yxatga marshrut qo'shiladi. Ular
-/// ataylab OLDINDAN ko'rsatilmaydi: ishlamaydigan menyu bandi adminni
-/// chalg'itadi.
+/// TTZ §6 dagi barcha modullar. Yangi modul shu ro'yxatga marshrut bilan
+/// birga qo'shiladi — ishlamaydigan menyu bandi oldindan ko'rsatilmaydi,
+/// u adminni chalg'itadi.
 const adminNavigation = <NavGroup>[
   NavGroup(
     titleKey: 'admin.nav.overview',
@@ -128,6 +127,12 @@ const adminNavigation = <NavGroup>[
         icon: Icons.campaign_outlined,
         permissions: [AdminPermission.notificationsSend],
       ),
+      NavItem(
+        route: AdminRoutes.support,
+        labelKey: 'admin.nav.support',
+        icon: Icons.support_agent_outlined,
+        permissions: [AdminPermission.supportRead],
+      ),
     ],
   ),
   NavGroup(
@@ -152,22 +157,5 @@ const adminNavigation = <NavGroup>[
         permissions: [AdminPermission.settingsWrite],
       ),
     ],
-  ),
-];
-
-/// Hali qurilmagan modullar — sidebar pastida "tez orada" deb ko'rsatiladi.
-///
-/// Ro'yxatda qoldirish ataylab: qurilmagan modulni yashirish adminni
-/// "hammasi tayyor" deb o'ylashga majbur qilardi.
-///
-/// **Support** (TTZ §6.12) — jadvallar bazada tayyor (`support_tickets`,
-/// `support_messages`, 0012), lekin mobil ilovada "Yordam" ekrani YO'Q,
-/// ya'ni ticket yaratadigan hech kim yo'q. Admin tomonini avval qurish
-/// bo'sh ro'yxat bilan tugardi.
-const plannedModules = <(String, IconData, String)>[
-  (
-    'admin.nav.support',
-    Icons.support_agent_outlined,
-    AdminPermission.supportRead,
   ),
 ];

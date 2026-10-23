@@ -1,4 +1,5 @@
 import '../../core/supabase/admin_config.dart';
+import '../../core/i18n/ref_name.dart';
 import '../../core/supabase/db.dart';
 import '../../core/utils/result.dart';
 import '../models/admin_user.dart';
@@ -90,11 +91,11 @@ class AdminUserRepository {
         final rows = await Db.client
             .from('regions')
             .select('id, name_uz, name_ru, name_en')
-            .order('name_$locale');
+            .order(refNameColumn(locale));
 
         return [
           for (final r in rows)
-            RefItem(id: r['id'] as int, name: r['name_$locale'] as String),
+            RefItem(id: r['id'] as int, name: refName(r, locale) ?? ''),
         ];
       });
 

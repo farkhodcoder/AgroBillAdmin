@@ -1,3 +1,5 @@
+import '../../core/i18n/ref_name.dart';
+
 /// Xodim yozuvi (`admin_users` + `profiles`).
 class StaffRow {
   const StaffRow({
@@ -162,7 +164,7 @@ class ContentRow {
           ? null
           : DateTime.parse(json['published_at'] as String),
       authorName: author?['full_name'] as String?,
-      cropName: crop?['name_$locale'] as String?,
+      cropName: refName(crop, locale),
     );
   }
 

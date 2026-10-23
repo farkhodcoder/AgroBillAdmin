@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/supabase/admin_config.dart';
 import '../../../core/utils/result.dart';
+import '../../../core/utils/safe_emit.dart';
 import '../../../data/repositories/admin_audit_repository.dart';
 
 class AuditState extends Equatable {
@@ -67,10 +68,15 @@ class AuditState extends Equatable {
 
 /// Audit jurnali — faqat o'qish (0010 dagi triggerlar yozuvni o'zgarmas
 /// qiladi), shuning uchun cubit'da amal metodi yo'q.
-class AuditCubit extends Cubit<AuditState> {
+class AuditCubit extends Cubit<AuditState> with SafeEmit<AuditState> {
   AuditCubit(this._repo) : super(const AuditState());
 
   final AdminAuditRepository _repo;
+
+  /// So'nggi `load()` tartib raqami. Qidiruv yoki sahifa tez almashganda
+  /// javoblar tartibsiz keladi — kechikkan eski javob yangisini bosib ketib,
+  /// jadval filtrga mos kelmay qolardi.
+  int _loadSeq = 0;
 
   Future<void> init() async {
     final actionsRes = await _repo.actions();
@@ -79,9 +85,11 @@ class AuditCubit extends Cubit<AuditState> {
   }
 
   Future<void> load() async {
+    final seq = ++_loadSeq;
     emit(state.copyWith(loading: true, clearFailure: true));
 
     final res = await _repo.list(filter: state.filter, page: state.page);
+    if (seq != _loadSeq) return;
 
     switch (res) {
       case Ok(:final value):

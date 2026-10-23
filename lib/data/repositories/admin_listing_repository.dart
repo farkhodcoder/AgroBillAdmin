@@ -1,4 +1,5 @@
-import 'package:supabase_flutter/supabase_flutter.dart' show SignedUrlSuccess;
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show CountOption, SignedUrlSuccess;
 
 import '../../core/supabase/admin_config.dart';
 import '../../core/supabase/db.dart';
@@ -18,7 +19,11 @@ class AdminListingRepository {
       'id, title, status, price, price_mode, kind, unit, quantity, '
       'category, description, '
       'reject_reason, view_count, created_at, expires_at, '
-      'profiles(id, full_name, email), '
+      // FK nomi aniq ko'rsatiladi: 0033 dagi `listing_views` (PK =
+      // listing_id + user_id) PostgREST uchun `listings <-> profiles`
+      // ko'pdan-ko'pga bog'lanishi bo'lib qoldi. Oddiy `profiles(...)`
+      // ikki ma'noli bo'lib, butun ro'yxat `PGRST201` bilan qulardi.
+      'profiles!listings_seller_id_fkey(id, full_name, email), '
       'regions(name_uz, name_ru, name_en), '
       'crop_types(name_uz, name_ru, name_en), '
       'listing_images(storage_path, sort_order)';
@@ -34,9 +39,11 @@ class AdminListingRepository {
         .select(_select)
         .isFilter('deleted_at', null);
 
-    final search = filter.search.trim();
+    // `%` va `_` — ILIKE shabloni belgilari, `*` — PostgREST da `%` ning
+    // muqobili. Ular olib tashlanmasa "50%" qidiruvi hamma narsani topardi.
+    final search = filter.search.trim().replaceAll(RegExp(r'[%_*\\]'), '');
     if (search.isNotEmpty) {
-      query = query.ilike('title', '%${search.replaceAll('%', '')}%');
+      query = query.ilike('title', '%$search%');
     }
     if (filter.status != null) query = query.eq('status', filter.status!);
     if (filter.regionId != null) {
@@ -61,14 +68,19 @@ class AdminListingRepository {
   });
 
   /// Kutayotgan e'lonlar soni — navbat belgisida ko'rsatiladi.
+  ///
+  /// Ilgari `.limit(200)` bilan qatorlar yuklanib sanalardi: navbat 200 dan
+  /// oshganda sarlavha doim "200 ta" deb ko'rsatardi. Endi son bazada
+  /// hisoblanadi (`count: exact`), qatorlardan esa bittasi yuklanadi.
   Future<Result<int>> pendingCount() => guard(() async {
-    final rows = await Db.client
+    final res = await Db.client
         .from('listings')
         .select('id')
         .eq('status', ListingStatus.pending)
         .isFilter('deleted_at', null)
-        .limit(200);
-    return (rows as List).length;
+        .limit(1)
+        .count(CountOption.exact);
+    return res.count;
   });
 
   Future<Result<List<ModerationEntry>>> history(String listingId) =>

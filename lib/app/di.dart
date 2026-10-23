@@ -11,6 +11,7 @@ import '../data/repositories/admin_listing_repository.dart';
 import '../data/repositories/admin_ops_repository.dart';
 import '../data/repositories/admin_order_repository.dart';
 import '../data/repositories/admin_staff_repository.dart';
+import '../data/repositories/admin_support_repository.dart';
 import '../data/repositories/admin_user_repository.dart';
 
 final getIt = GetIt.instance;
@@ -40,5 +41,6 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<AdminAiRepository>(AdminAiRepository.new)
     ..registerLazySingleton<AdminAuditRepository>(AdminAuditRepository.new)
     ..registerLazySingleton<AdminStaffRepository>(AdminStaffRepository.new)
-    ..registerLazySingleton<AdminOpsRepository>(AdminOpsRepository.new);
+    ..registerLazySingleton<AdminOpsRepository>(AdminOpsRepository.new)
+    ..registerLazySingleton<AdminSupportRepository>(AdminSupportRepository.new);
 }

@@ -1,3 +1,5 @@
+import '../../core/i18n/ref_name.dart';
+
 /// Xo'jalik ro'yxati qatori (`farms` + egasi + viloyat).
 class AdminFarmRow {
   const AdminFarmRow({
@@ -39,8 +41,8 @@ class AdminFarmRow {
       ownerId: owner?['id'] as String?,
       ownerName: owner?['full_name'] as String?,
       ownerEmail: owner?['email'] as String?,
-      regionName: region?['name_$locale'] as String?,
-      districtName: district?['name_$locale'] as String?,
+      regionName: refName(region, locale),
+      districtName: refName(district, locale),
       fieldCount: count,
     );
   }
@@ -101,7 +103,7 @@ class AdminFieldRow {
       areaHectares: AdminFarmRow._num(json['area_hectares']),
       health: json['health'] as String? ?? 'healthy',
       healthScore: (json['health_score'] as num?)?.toInt(),
-      cropName: cropType?['name_$locale'] as String?,
+      cropName: refName(cropType, locale),
       growthPercent: (crop?['growth_percent'] as num?)?.toInt(),
       hasBoundary: json['boundary_geojson'] != null,
     );

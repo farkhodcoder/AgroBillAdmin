@@ -1,3 +1,6 @@
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../core/i18n/ref_name.dart';
 import '../../core/supabase/admin_config.dart';
 import '../../core/supabase/db.dart';
 import '../../core/utils/result.dart';
@@ -50,7 +53,8 @@ class AdminAiRepository {
         .from('scan_results')
         .select(
           'id, disease_name, disease_latin, confidence, severity, is_plant, '
-          'model_version, latency_ms, created_at, '
+          'model_version, latency_ms, created_at, image_path, symptoms, '
+          'treatments, prevention, '
           'profiles(full_name, email), crop_types(name_uz, name_ru, name_en)',
         );
 
@@ -69,6 +73,102 @@ class AdminAiRepository {
       for (final r in rows)
         ScanRow.fromJson(Map<String, dynamic>.from(r), locale: locale),
     ];
+  });
+
+  /// Skan rasmlari uchun signed URL — `yo'l -> URL`.
+  ///
+  /// `scan-images` private buket. Admin unga `storage_admin_read` (0009) va
+  /// `storage_admin_scan_read` (0044) orqali kiradi. Ruxsat yo'q yoki fayl
+  /// o'chirilgan bo'lsa o'sha yo'l xaritada bo'lmaydi va ekranda rasm o'rniga
+  /// belgi chiqadi — sahifa baribir ishlaydi.
+  Future<Result<Map<String, String>>> scanImageUrls(List<String> paths) =>
+      guard(() async {
+        if (paths.isEmpty) return const <String, String>{};
+
+        final results = await Db.client.storage
+            .from(AdminConfig.bucketScanImages)
+            .createSignedUrlsResult(paths, AdminConfig.signedUrlTtl.inSeconds);
+
+        return {
+          for (final r in results)
+            if (r is SignedUrlSuccess) r.path: r.signedUrl,
+        };
+      });
+
+  /// Foydalanuvchilar AI ga bergan savollar, yangisidan boshlab.
+  ///
+  /// Faqat `role = 'user'` — javoblar suhbat panelida ko'rinadi. RLS
+  /// `ai.moderate` talab qiladi (0009). Ruxsat bo'lmasa PostgREST xato
+  /// qaytarmaydi, shunchaki bo'sh ro'yxat beradi — "savol yo'q" deb
+  /// adashmaslik uchun ekran ruxsatni o'zi oldindan tekshiradi.
+  Future<Result<List<AiQuestion>>> questions({
+    required int page,
+    String search = '',
+    int pageSize = AdminConfig.pageSize,
+  }) => guard(() async {
+    var query = Db.client
+        .from('ai_messages')
+        .select(
+          'id, conversation_id, content, created_at, '
+          'ai_conversations!inner(title, user_id, profiles(full_name, email))',
+        )
+        .eq('role', 'user');
+
+    final q = search.trim().replaceAll('%', '').replaceAll(',', ' ');
+    if (q.isNotEmpty) query = query.ilike('content', '%$q%');
+
+    final rows = await query
+        .order('created_at', ascending: false)
+        .range(page * pageSize, page * pageSize + pageSize);
+
+    return [
+      for (final r in rows) AiQuestion.fromJson(Map<String, dynamic>.from(r)),
+    ];
+  });
+
+  /// Bitta suhbatning to'liq yozishmasi — savol va AI javoblari.
+  Future<Result<List<AiChatMessage>>> conversation(String conversationId) =>
+      guard(() async {
+        final rows = await Db.client
+            .from('ai_messages')
+            .select('id, role, content, created_at')
+            .eq('conversation_id', conversationId)
+            .order('created_at')
+            .limit(200);
+
+        return [
+          for (final r in rows)
+            AiChatMessage.fromJson(Map<String, dynamic>.from(r)),
+        ];
+      });
+
+  /// Davr bo'yicha jami savol, skan va faol foydalanuvchilar.
+  ///
+  /// `ai_usage_limits` da har foydalanuvchiga kuniga bitta qator — 90 kunda
+  /// ham bir necha ming qatordan oshmaydi, mijozda qo'shish arzon.
+  Future<Result<AiTotals>> totals({required int days}) => guard(() async {
+    final from = DateTime.now().subtract(Duration(days: days - 1));
+
+    final rows = await Db.client
+        .from('ai_usage_limits')
+        .select('user_id, questions_count, scans_count')
+        .gte('usage_date', _date(from))
+        .limit(10000);
+
+    var questions = 0;
+    var scans = 0;
+    final users = <String>{};
+    for (final r in rows) {
+      questions += (r['questions_count'] as num?)?.toInt() ?? 0;
+      scans += (r['scans_count'] as num?)?.toInt() ?? 0;
+      users.add(r['user_id'] as String);
+    }
+
+    return AiTotals(
+      questions: questions,
+      scans: scans,
+      activeUsers: users.length,
+    );
   });
 
   /// Model bo'yicha yig'ma.
@@ -131,8 +231,9 @@ class AdminAiRepository {
     var query = Db.client
         .from('disease_reference')
         .select(
-          'id, code, name_uz, name_ru, name_en, latin_name, description, '
-          'causes, prevention, status, symptoms, treatments, updated_at, '
+          'id, code, crop_type_id, name_uz, name_ru, name_en, latin_name, '
+          'description, causes, prevention, status, symptoms, treatments, '
+          'updated_at, '
           'crop_types(name_uz, name_ru, name_en)',
         );
 
@@ -162,6 +263,51 @@ class AdminAiRepository {
           'admin_publish_disease',
           params: {'p_id': id, 'p_status': status},
         );
+      });
+
+  /// Ekin turlari — kasallik formasidagi tanlov.
+  Future<Result<List<CropOption>>> crops({String locale = 'uz'}) =>
+      guard(() async {
+        final rows = await Db.client
+            .from('crop_types')
+            .select('id, name_uz, name_ru, name_en')
+            .order('id');
+
+        return [
+          for (final r in rows)
+            CropOption(
+              id: (r['id'] as num).toInt(),
+              name: refName(r, locale) ?? '${r['id']}',
+            ),
+        ];
+      });
+
+  /// Yangi kasallik — `draft` holatida.
+  ///
+  /// RPC yo'q: `disease_reference_admin_write` siyosati (0013) `for all`,
+  /// ya'ni to'g'ridan-to'g'ri `insert` ishlaydi. Yangi yozuv mobil ilovaga
+  /// faqat `published` qilinganda ko'rinadi — nashr esa
+  /// `admin_publish_disease` orqali, auditga tushib o'tadi.
+  Future<Result<int>> createDisease(DiseaseDraft draft) => guard(() async {
+    final row = await Db.client
+        .from('disease_reference')
+        .insert({
+          ...draft.toJson(),
+          'status': ContentStatus.draft,
+          'author_id': Db.userId,
+        })
+        .select('id')
+        .single();
+    return (row['id'] as num).toInt();
+  });
+
+  /// Mavjud yozuvni tahrirlash. Holat bu yerda o'zgarmaydi.
+  Future<Result<void>> updateDisease(int id, DiseaseDraft draft) =>
+      guard(() async {
+        await Db.client
+            .from('disease_reference')
+            .update(draft.toJson())
+            .eq('id', id);
       });
 
   static String _date(DateTime d) =>

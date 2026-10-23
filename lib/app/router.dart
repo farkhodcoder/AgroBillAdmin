@@ -20,6 +20,7 @@ import '../features/shell/app_shell.dart';
 import '../features/settings/pages/settings_page.dart';
 import '../features/shell/pages/splash_page.dart';
 import '../features/staff/pages/staff_page.dart';
+import '../features/support/pages/support_page.dart';
 import '../features/users/pages/users_page.dart';
 import '../features/weather/pages/weather_page.dart';
 import 'routes.dart';
@@ -169,6 +170,11 @@ GoRouter createRouter(AdminAuthCubit authCubit) => GoRouter(
           path: AdminRoutes.campaigns,
           name: AdminRoutes.campaignsName,
           builder: (context, state) => const CampaignsPage(),
+        ),
+        GoRoute(
+          path: AdminRoutes.support,
+          name: AdminRoutes.supportName,
+          builder: (context, state) => const SupportPage(),
         ),
       ],
     ),

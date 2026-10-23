@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/rbac/permission.dart';
@@ -14,7 +15,7 @@ import '../../../ui/admin_bits.dart';
 import '../../../ui/admin_button.dart';
 import '../../../ui/admin_feedback.dart';
 import '../cubit/listings_cubit.dart';
-import '../pages/marketplace_page.dart' show listingTone;
+import '../pages/marketplace_page.dart' show listingPrice, listingTone;
 
 /// E'lon tafsiloti va moderatsiya qarorlari.
 class ListingDetailPanel extends StatelessWidget {
@@ -25,6 +26,7 @@ class ListingDetailPanel extends StatelessWidget {
     required this.history,
     required this.loading,
     required this.onClose,
+    this.acting = false,
   });
 
   final AdminListingRow listing;
@@ -33,67 +35,83 @@ class ListingDetailPanel extends StatelessWidget {
   final bool loading;
   final VoidCallback onClose;
 
+  /// Qaror so'rovi ketmoqda — tugmalar bloklanadi.
+  final bool acting;
+
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
+    final description = listing.description?.trim() ?? '';
 
+    // Esc — panelni yopadi. Moderator navbatni klaviaturada ko'rib chiqadi,
+    // har safar sichqoncha bilan "×" ni izlash sekinlashtirardi.
     return Positioned.fill(
-      child: Stack(
-        children: [
-          GestureDetector(
-            onTap: onClose,
-            child: Container(color: Colors.black.withValues(alpha: 0.35)),
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Material(
-              color: c.surface,
-              child: SizedBox(
-                width: 560,
-                height: double.infinity,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _Header(listing: listing, colors: c, onClose: onClose),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(AgSpace.x6),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _Images(
-                              urls: imageUrls,
-                              count: listing.imagePaths.length,
-                              loading: loading,
-                              colors: c,
-                            ),
-                            const SizedBox(height: AgSpace.x5),
-                            _Facts(listing: listing, colors: c),
-                            if (listing.description != null) ...[
-                              const SizedBox(height: AgSpace.x5),
-                              Text(
-                                listing.description!,
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: c.textSecondary,
+      child: CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.escape): () {
+            if (!acting) onClose();
+          },
+        },
+        child: Focus(
+          autofocus: true,
+          child: Stack(
+            children: [
+              GestureDetector(
+                onTap: onClose,
+                child: Container(color: Colors.black.withValues(alpha: 0.35)),
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Material(
+                  color: c.surface,
+                  child: SizedBox(
+                    width: 560,
+                    height: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _Header(listing: listing, colors: c, onClose: onClose),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: const EdgeInsets.all(AgSpace.x6),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _Images(
+                                  urls: imageUrls,
+                                  count: listing.imagePaths.length,
+                                  loading: loading,
+                                  colors: c,
                                 ),
-                              ),
-                            ],
-                            const SizedBox(height: AgSpace.x6),
-                            _Actions(listing: listing),
-                            if (history.isNotEmpty) ...[
-                              const SizedBox(height: AgSpace.x6),
-                              _History(entries: history, colors: c),
-                            ],
-                          ],
+                                const SizedBox(height: AgSpace.x5),
+                                _Facts(listing: listing, colors: c),
+                                if (description.isNotEmpty) ...[
+                                  const SizedBox(height: AgSpace.x5),
+                                  Text(
+                                    description,
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: c.textSecondary,
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: AgSpace.x6),
+                                _Actions(listing: listing, acting: acting),
+                                if (history.isNotEmpty) ...[
+                                  const SizedBox(height: AgSpace.x6),
+                                  _History(entries: history, colors: c),
+                                ],
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -242,7 +260,7 @@ class _Facts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = <(String, String)>[
-      ('admin.market.col_price', Fmt.price(listing.price)),
+      ('admin.market.col_price', listingPrice(listing)),
       // Sotuv/ijara farqi narxni butunlay boshqacha o'qitadi: ijarada u
       // oylik to'lov. Moderator buni ko'rmasa narxni noto'g'ri baholaydi.
       (
@@ -297,12 +315,21 @@ class _Facts extends StatelessWidget {
 }
 
 class _Actions extends StatelessWidget {
-  const _Actions({required this.listing});
+  const _Actions({required this.listing, required this.acting});
 
   final AdminListingRow listing;
+  final bool acting;
+
+  /// E'lon allaqachon shu holatda bo'lsa tugma ko'rsatilmaydi: faol e'lonni
+  /// qayta "tasdiqlash" sotuvchiga ortiqcha bildirishnoma va tarixga
+  /// ma'nosiz `active -> active` yozuvini qo'shardi.
+  bool _offers(String status) => listing.status != status;
 
   @override
   Widget build(BuildContext context) {
+    final canRequestChanges = _offers(ListingStatus.changesRequested);
+    final canReject = _offers(ListingStatus.rejected);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -312,44 +339,57 @@ class _Actions extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              AdminButton(
-                label: 'admin.market.approve'.tr(),
-                icon: Icons.check,
-                size: AdminButtonSize.large,
-                expand: true,
-                onPressed: () => _decide(context, ListingStatus.active),
-              ),
-              const SizedBox(height: AgSpace.x2),
-              Row(
-                children: [
-                  Expanded(
-                    child: AdminButton(
-                      label: 'admin.market.request_changes'.tr(),
-                      kind: AdminButtonKind.secondary,
-                      expand: true,
-                      onPressed: () =>
-                          _decide(context, ListingStatus.changesRequested),
-                    ),
-                  ),
-                  const SizedBox(width: AgSpace.x2),
-                  Expanded(
-                    child: AdminButton(
-                      label: 'admin.market.reject'.tr(),
-                      kind: AdminButtonKind.danger,
-                      expand: true,
-                      onPressed: () => _decide(context, ListingStatus.rejected),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AgSpace.x2),
-              AdminButton(
-                label: 'admin.market.suspend'.tr(),
-                kind: AdminButtonKind.secondary,
-                expand: true,
-                icon: Icons.pause_circle_outline,
-                onPressed: () => _decide(context, ListingStatus.suspended),
-              ),
+              if (_offers(ListingStatus.active)) ...[
+                AdminButton(
+                  label: 'admin.market.approve'.tr(),
+                  icon: Icons.check,
+                  size: AdminButtonSize.large,
+                  expand: true,
+                  busy: acting,
+                  onPressed: () => _decide(context, ListingStatus.active),
+                ),
+                const SizedBox(height: AgSpace.x2),
+              ],
+              if (canRequestChanges || canReject) ...[
+                Row(
+                  children: [
+                    if (canRequestChanges)
+                      Expanded(
+                        child: AdminButton(
+                          label: 'admin.market.request_changes'.tr(),
+                          kind: AdminButtonKind.secondary,
+                          expand: true,
+                          busy: acting,
+                          onPressed: () =>
+                              _decide(context, ListingStatus.changesRequested),
+                        ),
+                      ),
+                    if (canRequestChanges && canReject)
+                      const SizedBox(width: AgSpace.x2),
+                    if (canReject)
+                      Expanded(
+                        child: AdminButton(
+                          label: 'admin.market.reject'.tr(),
+                          kind: AdminButtonKind.danger,
+                          expand: true,
+                          busy: acting,
+                          onPressed: () =>
+                              _decide(context, ListingStatus.rejected),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: AgSpace.x2),
+              ],
+              if (_offers(ListingStatus.suspended))
+                AdminButton(
+                  label: 'admin.market.suspend'.tr(),
+                  kind: AdminButtonKind.secondary,
+                  expand: true,
+                  icon: Icons.pause_circle_outline,
+                  busy: acting,
+                  onPressed: () => _decide(context, ListingStatus.suspended),
+                ),
             ],
           ),
         ),
@@ -366,8 +406,10 @@ class _Actions extends StatelessWidget {
               kind: AdminButtonKind.ghost,
               expand: true,
               icon: Icons.delete_outline,
+              busy: acting,
               onPressed: () async {
                 final cubit = context.read<ListingsCubit>();
+                final messenger = ScaffoldMessenger.of(context);
                 final result = await showReasonDialog(
                   context,
                   title: 'admin.market.delete'.tr(),
@@ -377,7 +419,9 @@ class _Actions extends StatelessWidget {
                   confirmLabel: 'admin.market.delete'.tr(),
                 );
                 if (!result.confirmed || result.reason == null) return;
-                await cubit.delete(listing.id, result.reason!);
+                if (await cubit.delete(listing.id, result.reason!)) {
+                  _notifyDone(messenger);
+                }
               },
             ),
           ),
@@ -388,6 +432,9 @@ class _Actions extends StatelessWidget {
 
   Future<void> _decide(BuildContext context, String status) async {
     final cubit = context.read<ListingsCubit>();
+    // Muvaffaqiyatdan keyin panel yopiladi va bu `context` yo'qoladi —
+    // xabar uchun messenger oldindan olinadi.
+    final messenger = ScaffoldMessenger.of(context);
     final needsReason = ListingStatus.needsReason(status);
 
     final result = await showReasonDialog(
@@ -402,7 +449,18 @@ class _Actions extends StatelessWidget {
     );
 
     if (!result.confirmed) return;
-    await cubit.moderate(listing.id, status, result.reason);
+    if (await cubit.moderate(listing.id, status, result.reason)) {
+      _notifyDone(messenger);
+    }
+  }
+
+  /// Qaror saqlangani haqida qisqa xabar. Ilgari muvaffaqiyatda panel
+  /// jimgina yopilardi — moderator qaror o'tdimi yoki panel shunchaki
+  /// yopildimi, bilmasdi.
+  void _notifyDone(ScaffoldMessengerState messenger) {
+    messenger.showSnackBar(
+      SnackBar(content: Text('admin.market.action_done'.tr())),
+    );
   }
 }
 

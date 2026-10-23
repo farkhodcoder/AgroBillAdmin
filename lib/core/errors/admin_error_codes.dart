@@ -59,6 +59,18 @@ abstract final class AdminErrorCode {
   static const invalidValue = 'INVALID_VALUE';
   static const orderAlreadyClosed = 'ORDER_ALREADY_CLOSED';
 
+  /// Asoschi yagona — rolni hech kimga berib bo'lmaydi (0043).
+  static const founderIsUnique = 'FOUNDER_IS_UNIQUE';
+
+  /// `admin-staff` (create): bu email bilan akkaunt allaqachon bor. Mavjud
+  /// foydalanuvchini xodim qilish — "Foydalanuvchilar" bo'limidagi rol tugmasi.
+  static const emailExists = 'EMAIL_EXISTS';
+
+  /// `admin-staff`: parol 8 belgidan qisqa yoki Supabase uni rad etdi.
+  static const weakPassword = 'WEAK_PASSWORD';
+
+  static const invalidEmail = 'INVALID_EMAIL';
+
   /// Kod -> (`FailureKind`, tarjima kaliti).
   static const _map = <String, (FailureKind, String)>{
     permissionDenied: (
@@ -101,6 +113,10 @@ abstract final class AdminErrorCode {
       FailureKind.conflict,
       'admin.errors.order_already_closed',
     ),
+    founderIsUnique: (FailureKind.permission, 'admin.errors.founder_is_unique'),
+    emailExists: (FailureKind.conflict, 'admin.errors.email_exists'),
+    weakPassword: (FailureKind.validation, 'admin.errors.weak_password'),
+    invalidEmail: (FailureKind.validation, 'admin.errors.invalid_email'),
   };
 
   /// Server xabaridan ma'lum kodni ajratib oladi.

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/supabase/admin_config.dart';
 import '../../../core/utils/result.dart';
+import '../../../core/utils/safe_emit.dart';
 import '../../../data/models/admin_farm.dart';
 import '../../../data/models/admin_user.dart';
 import '../../../data/repositories/admin_farm_repository.dart';
@@ -83,13 +84,18 @@ class FarmsState extends Equatable {
   ];
 }
 
-class FarmsCubit extends Cubit<FarmsState> {
+class FarmsCubit extends Cubit<FarmsState> with SafeEmit<FarmsState> {
   FarmsCubit(this._repo, this._userRepo, this._locale)
     : super(const FarmsState());
 
   final AdminFarmRepository _repo;
   final AdminUserRepository _userRepo;
   final String _locale;
+
+  /// So'nggi `load()` tartib raqami. Qidiruv yoki sahifa tez almashganda
+  /// javoblar tartibsiz keladi — kechikkan eski javob yangisini bosib ketib,
+  /// jadval filtrga mos kelmay qolardi.
+  int _loadSeq = 0;
 
   Future<void> init() async {
     // Viloyatlar ro'yxati foydalanuvchilar moduli bilan bir xil — takroriy
@@ -100,6 +106,7 @@ class FarmsCubit extends Cubit<FarmsState> {
   }
 
   Future<void> load() async {
+    final seq = ++_loadSeq;
     emit(state.copyWith(loading: true, clearFailure: true));
 
     final res = await _repo.list(
@@ -107,6 +114,7 @@ class FarmsCubit extends Cubit<FarmsState> {
       page: state.page,
       locale: _locale,
     );
+    if (seq != _loadSeq) return;
 
     switch (res) {
       case Ok(:final value):
@@ -145,6 +153,8 @@ class FarmsCubit extends Cubit<FarmsState> {
     );
 
     final res = await _repo.fields(farmId, locale: _locale);
+    // Boshqa xo'jalik ochilgan yoki panel yopilgan — eski natija kerak emas.
+    if (state.selectedFarmId != farmId) return;
     emit(
       state.copyWith(fields: res.valueOrNull ?? const [], fieldsLoading: false),
     );

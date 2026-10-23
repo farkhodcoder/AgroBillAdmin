@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/supabase/admin_config.dart';
 import '../../../core/utils/result.dart';
+import '../../../core/utils/safe_emit.dart';
 import '../../../data/models/admin_listing.dart';
 import '../../../data/models/admin_user.dart';
 import '../../../data/repositories/admin_listing_repository.dart';
@@ -23,6 +24,7 @@ class ListingsState extends Equatable {
     this.imageUrls = const [],
     this.history = const [],
     this.detailLoading = false,
+    this.acting = false,
   });
 
   final List<AdminListingRow> rows;
@@ -42,6 +44,11 @@ class ListingsState extends Equatable {
   final List<ModerationEntry> history;
   final bool detailLoading;
 
+  /// Moderatsiya/o'chirish so'rovi ketmoqda — tugmalar bloklanadi, aks holda
+  /// ikki marta bosish ikkita RPC, ikkita bildirishnoma va ikkita audit
+  /// yozuvi yaratardi.
+  final bool acting;
+
   AdminListingRow? get selected =>
       rows.where((r) => r.id == selectedId).firstOrNull;
 
@@ -59,6 +66,7 @@ class ListingsState extends Equatable {
     List<String>? imageUrls,
     List<ModerationEntry>? history,
     bool? detailLoading,
+    bool? acting,
     bool clearFailure = false,
     bool clearActionFailure = false,
     bool clearSelection = false,
@@ -78,6 +86,7 @@ class ListingsState extends Equatable {
     imageUrls: clearSelection ? const [] : (imageUrls ?? this.imageUrls),
     history: clearSelection ? const [] : (history ?? this.history),
     detailLoading: detailLoading ?? this.detailLoading,
+    acting: acting ?? this.acting,
   );
 
   @override
@@ -97,16 +106,23 @@ class ListingsState extends Equatable {
     imageUrls.length,
     history.length,
     detailLoading,
+    acting,
   ];
 }
 
-class ListingsCubit extends Cubit<ListingsState> {
+class ListingsCubit extends Cubit<ListingsState> with SafeEmit<ListingsState> {
   ListingsCubit(this._repo, this._userRepo, this._locale)
     : super(const ListingsState());
 
   final AdminListingRepository _repo;
   final AdminUserRepository _userRepo;
   final String _locale;
+
+  /// So'nggi so'rovlar tartib raqami. Filtr tez-tez o'zgarganda (qidiruv,
+  /// sahifa) javoblar tartibsiz keladi — eskisi kechikib kelsa, yangi
+  /// natijani bosib ketardi va jadval filtrga mos kelmay qolardi.
+  int _loadSeq = 0;
+  int _selectSeq = 0;
 
   Future<void> init() async {
     final regionsRes = await _userRepo.regions(locale: _locale);
@@ -115,16 +131,22 @@ class ListingsCubit extends Cubit<ListingsState> {
   }
 
   Future<void> load() async {
+    final seq = ++_loadSeq;
     emit(state.copyWith(loading: true, clearFailure: true));
 
-    final res = await _repo.list(
-      filter: state.filter,
-      page: state.page,
-      locale: _locale,
-    );
-    final countRes = await _repo.pendingCount();
+    final (res, countRes) = await (
+      _repo.list(filter: state.filter, page: state.page, locale: _locale),
+      _repo.pendingCount(),
+    ).wait;
+    if (isClosed || seq != _loadSeq) return;
 
     switch (res) {
+      // Sahifadagi oxirgi e'lon hal qilingach (masalan navbatning 2-sahifasi)
+      // sahifa bo'shab qoladi va "Navbat bo'sh" chiqardi — oldingi
+      // sahifalarda e'lon bo'lsa ham. Bunday holda bir sahifa orqaga qaytiladi.
+      case Ok(:final value) when value.isEmpty && state.page > 0:
+        emit(state.copyWith(page: state.page - 1));
+        await load();
       case Ok(:final value):
         final hasMore = value.length > AdminConfig.pageSize;
         emit(
@@ -153,6 +175,7 @@ class ListingsCubit extends Cubit<ListingsState> {
 
   /// E'lonni ochadi: rasmlar uchun signed URL va moderatsiya tarixi.
   Future<void> select(String listingId) async {
+    final seq = ++_selectSeq;
     final row = state.rows.where((r) => r.id == listingId).firstOrNull;
     emit(
       state.copyWith(
@@ -167,6 +190,8 @@ class ListingsCubit extends Cubit<ListingsState> {
       _repo.imageUrls(row?.imagePaths ?? const []),
       _repo.history(listingId),
     ]);
+    // Boshqa e'lon ochilgan yoki panel yopilgan — eski natija kerak emas.
+    if (isClosed || seq != _selectSeq || state.selectedId != listingId) return;
 
     emit(
       state.copyWith(
@@ -179,7 +204,10 @@ class ListingsCubit extends Cubit<ListingsState> {
     );
   }
 
-  void closeDetail() => emit(state.copyWith(clearSelection: true));
+  void closeDetail() {
+    _selectSeq++;
+    emit(state.copyWith(clearSelection: true, detailLoading: false));
+  }
 
   Future<bool> moderate(String listingId, String status, String? reason) =>
       _action(
@@ -196,15 +224,18 @@ class ListingsCubit extends Cubit<ListingsState> {
   /// Amaldan keyin ro'yxat yangilanadi va panel yopiladi — qaror qabul
   /// qilingach navbatdagi e'longa o'tiladi.
   Future<bool> _action(Future<Result<void>> Function() run) async {
-    emit(state.copyWith(clearActionFailure: true));
+    if (state.acting) return false;
+    emit(state.copyWith(acting: true, clearActionFailure: true));
 
     final res = await run();
+    if (isClosed) return res.isOk;
     if (res case Fail(:final failure)) {
-      emit(state.copyWith(actionFailure: failure));
+      emit(state.copyWith(acting: false, actionFailure: failure));
       return false;
     }
 
-    emit(state.copyWith(clearSelection: true));
+    _selectSeq++;
+    emit(state.copyWith(acting: false, clearSelection: true));
     await load();
     return true;
   }

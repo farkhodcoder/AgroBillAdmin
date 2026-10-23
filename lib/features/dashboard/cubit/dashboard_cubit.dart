@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/utils/result.dart';
+import '../../../core/utils/safe_emit.dart';
 import '../../../data/models/admin_metrics.dart';
 import '../../../data/repositories/admin_dashboard_repository.dart';
 
@@ -47,7 +48,8 @@ class DashboardState extends Equatable {
   ];
 }
 
-class DashboardCubit extends Cubit<DashboardState> {
+class DashboardCubit extends Cubit<DashboardState>
+    with SafeEmit<DashboardState> {
   DashboardCubit(this._repo) : super(const DashboardState());
 
   final AdminDashboardRepository _repo;

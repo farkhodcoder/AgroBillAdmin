@@ -320,9 +320,7 @@ class _Actions extends StatelessWidget {
               final result = await showReasonDialog(
                 context,
                 title: 'admin.users.delete'.tr(),
-                message: 'admin.users.delete_confirm'.tr(
-                  args: [row.fullName],
-                ),
+                message: 'admin.users.delete_confirm'.tr(args: [row.fullName]),
                 confirmLabel: 'admin.users.delete'.tr(),
               );
               if (!result.confirmed || result.reason == null) return;
@@ -347,7 +345,7 @@ class _Actions extends StatelessWidget {
             style: AppTypography.h3.copyWith(color: c.text),
           ),
           children: [
-            for (final code in AdminRole.all)
+            for (final code in AdminRole.assignable)
               SimpleDialogOption(
                 onPressed: () => Navigator.of(context).pop(code),
                 child: Text(

@@ -9,23 +9,20 @@ import 'package:flutter_test/flutter_test.dart';
 /// moderator esa uni tekin deb rad etardi. Dart tur tizimi buni ushlamadi,
 /// chunki `0` ham toʻliq yaroqli `double`.
 void main() {
-  Map<String, dynamic> row({
-    Object? price,
-    String? priceMode,
-    String? kind,
-  }) => {
-    'id': '11111111-1111-1111-1111-111111111111',
-    'title': 'Sinov eʼloni',
-    'status': ListingStatus.pending,
-    'price': price,
-    'price_mode': ?priceMode,
-    'kind': ?kind,
-    'quantity': 10,
-    'unit': 'kg',
-    'category': 'harvest',
-    'created_at': '2026-10-01T00:00:00Z',
-    'expires_at': '2026-11-01T00:00:00Z',
-  };
+  Map<String, dynamic> row({Object? price, String? priceMode, String? kind}) =>
+      {
+        'id': '11111111-1111-1111-1111-111111111111',
+        'title': 'Sinov eʼloni',
+        'status': ListingStatus.pending,
+        'price': price,
+        'price_mode': ?priceMode,
+        'kind': ?kind,
+        'quantity': 10,
+        'unit': 'kg',
+        'category': 'harvest',
+        'created_at': '2026-10-01T00:00:00Z',
+        'expires_at': '2026-11-01T00:00:00Z',
+      };
 
   test('kelishiladigan eʼlon narxi 0 ga aylanmaydi', () {
     final listing = AdminListingRow.fromJson(

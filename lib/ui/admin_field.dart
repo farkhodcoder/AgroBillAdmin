@@ -26,6 +26,9 @@ class AdminField extends StatelessWidget {
     this.style,
     this.onSubmitted,
     this.maxLength,
+    this.reserveErrorSpace = true,
+    this.maxLines = 1,
+    this.minLines,
   });
 
   final TextEditingController controller;
@@ -42,6 +45,15 @@ class AdminField extends StatelessWidget {
   final ValueChanged<String>? onSubmitted;
   final int? maxLength;
 
+  /// Ko'p qatorli matn (tavsif, javob). `obscure` bilan birga ishlatilmaydi.
+  final int? maxLines;
+  final int? minLines;
+
+  /// Xato matni uchun joy doim band qilinsinmi. Formalarda — ha; filtr
+  /// qatoridagi qidiruv maydonida esa bu 20 px uni yonidagi ochiladigan
+  /// filtrlardan yuqoriga siljitardi.
+  final bool reserveErrorSpace;
+
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).extension<AppColors>()!;
@@ -50,11 +62,14 @@ class AdminField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTypography.label.copyWith(color: c.textSecondary),
-        ),
-        const SizedBox(height: AgSpace.x2),
+        // Bo'sh label ham balandlik egallardi (matn qatori + oraliq).
+        if (label.isNotEmpty) ...[
+          Text(
+            label,
+            style: AppTypography.label.copyWith(color: c.textSecondary),
+          ),
+          const SizedBox(height: AgSpace.x2),
+        ],
         TextField(
           controller: controller,
           obscureText: obscure,
@@ -64,6 +79,8 @@ class AdminField extends StatelessWidget {
           inputFormatters: inputFormatters,
           textAlign: textAlign,
           maxLength: maxLength,
+          maxLines: obscure ? 1 : maxLines,
+          minLines: minLines,
           onSubmitted: onSubmitted,
           style: (style ?? AppTypography.body).copyWith(color: c.text),
           decoration: InputDecoration(
@@ -98,18 +115,19 @@ class AdminField extends StatelessWidget {
           ),
         ),
         // Balandlik doim band — xato chiqqanda forma sakramaydi.
-        SizedBox(
-          height: 20,
-          child: hasError
-              ? Padding(
-                  padding: const EdgeInsets.only(top: AgSpace.x1),
-                  child: Text(
-                    errorText!,
-                    style: AppTypography.caption.copyWith(color: c.errorText),
-                  ),
-                )
-              : null,
-        ),
+        if (reserveErrorSpace || hasError)
+          SizedBox(
+            height: 20,
+            child: hasError
+                ? Padding(
+                    padding: const EdgeInsets.only(top: AgSpace.x1),
+                    child: Text(
+                      errorText!,
+                      style: AppTypography.caption.copyWith(color: c.errorText),
+                    ),
+                  )
+                : null,
+          ),
       ],
     );
   }

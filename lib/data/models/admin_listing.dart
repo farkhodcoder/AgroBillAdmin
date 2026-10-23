@@ -1,3 +1,5 @@
+import '../../core/i18n/ref_name.dart';
+
 /// E'lon holatlari.
 ///
 /// `changes_requested` va `suspended` — `0011_moderation.sql` da qo'shilgan.
@@ -124,8 +126,8 @@ class AdminListingRow {
       sellerId: seller?['id'] as String?,
       sellerName: seller?['full_name'] as String?,
       sellerEmail: seller?['email'] as String?,
-      regionName: region?['name_$locale'] as String?,
-      cropName: crop?['name_$locale'] as String?,
+      regionName: refName(region, locale),
+      cropName: refName(crop, locale),
       imagePaths: paths,
     );
   }

@@ -61,6 +61,9 @@ abstract final class AdminRoutes {
   static const campaigns = '/campaigns';
   static const campaignsName = 'campaigns';
 
+  static const support = '/support';
+  static const supportName = 'support';
+
   /// Kirish oqimiga tegishli barcha yo'llar — router `redirect` shu ro'yxatga
   /// qaraydi.
   static const authFlow = <String>[login, notAdmin];

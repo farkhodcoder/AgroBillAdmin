@@ -98,22 +98,39 @@ void main() {
   });
 
   group('Sidebar navigatsiyasi', () {
-    test('rejadagi modullar ruxsat kodlari haqiqiy', () {
+    test('menyu bandlarining ruxsat kodlari haqiqiy', () {
       // Notoʻgʻri yozilgan kod band hech qachon koʻrinmasligiga olib keladi
       // va buni faqat oʻsha rol bilan kirganda sezish mumkin.
-      for (final (_, _, permission) in plannedModules) {
-        expect(
-          AdminPermission.all,
-          contains(permission),
-          reason: 'nav_items.dart da nomaʼlum ruxsat: $permission',
-        );
+      for (final group in adminNavigation) {
+        for (final item in group.items) {
+          for (final permission in item.permissions) {
+            expect(
+              AdminPermission.all,
+              contains(permission),
+              reason: 'nav_items.dart da nomaʼlum ruxsat: $permission',
+            );
+          }
+        }
       }
     });
 
-    test('rejadagi modullar tarjima kaliti admin.nav bilan boshlanadi', () {
-      for (final (labelKey, _, _) in plannedModules) {
-        expect(labelKey, startsWith('admin.nav.'));
+    test('menyu tarjima kalitlari admin.nav bilan boshlanadi', () {
+      for (final group in adminNavigation) {
+        expect(group.titleKey, startsWith('admin.nav.'));
+        for (final item in group.items) {
+          expect(item.labelKey, startsWith('admin.nav.'));
+        }
       }
+    });
+
+    test('support moduli menyuda va support.read bilan ochiladi', () {
+      final support = [
+        for (final group in adminNavigation)
+          for (final item in group.items)
+            if (item.labelKey == 'admin.nav.support') item,
+      ].single;
+
+      expect(support.permissions, [AdminPermission.supportRead]);
     });
 
     test('tahlilchi faqat oʻqish modullarini koʻradi', () {

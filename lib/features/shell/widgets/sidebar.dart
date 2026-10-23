@@ -52,7 +52,10 @@ class Sidebar extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: AgSpace.x3),
               children: [
                 for (final group in adminNavigation) ...[
-                  if (!collapsed)
+                  // Ruxsat bo'lmagan guruhning sarlavhasi ham ko'rinmaydi —
+                  // aks holda bo'sh "SAVDO" kabi sarlavhalar osilib qolardi.
+                  if (!collapsed &&
+                      group.items.any((item) => item.visibleFor(perms)))
                     Padding(
                       padding: const EdgeInsets.fromLTRB(
                         AgSpace.x4,
@@ -77,38 +80,6 @@ class Sidebar extends StatelessWidget {
                         collapsed: collapsed,
                         colors: c,
                         onTap: () => context.go(item.route),
-                      ),
-                ],
-
-                // Rejadagi modullar — ish hajmi ko'rinib tursin. Ular
-                // bosilmaydi, chunki hali ekran yo'q; "ishlamayapti" degan
-                // taassurot qolmasligi uchun alohida ajratilgan.
-                if (!collapsed) ...[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AgSpace.x4,
-                      AgSpace.x6,
-                      AgSpace.x4,
-                      AgSpace.x2,
-                    ),
-                    child: Text(
-                      'admin.nav.coming_soon'.tr().toUpperCase(),
-                      style: AppTypography.caption.copyWith(
-                        color: c.textTertiary,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ),
-                  for (final (labelKey, icon, permission) in plannedModules)
-                    if (perms.has(permission))
-                      _NavTile(
-                        icon: icon,
-                        label: labelKey.tr(),
-                        selected: false,
-                        collapsed: collapsed,
-                        colors: c,
-                        disabled: true,
-                        onTap: null,
                       ),
                 ],
               ],
@@ -176,7 +147,6 @@ class _NavTile extends StatefulWidget {
     required this.collapsed,
     required this.colors,
     required this.onTap,
-    this.disabled = false,
   });
 
   final IconData icon;
@@ -185,7 +155,6 @@ class _NavTile extends StatefulWidget {
   final bool collapsed;
   final AppColors colors;
   final VoidCallback? onTap;
-  final bool disabled;
 
   @override
   State<_NavTile> createState() => _NavTileState();
@@ -197,11 +166,7 @@ class _NavTileState extends State<_NavTile> {
   @override
   Widget build(BuildContext context) {
     final c = widget.colors;
-    final fg = widget.disabled
-        ? c.textDisabled
-        : widget.selected
-        ? c.textBrand
-        : c.textSecondary;
+    final fg = widget.selected ? c.textBrand : c.textSecondary;
 
     final tile = Container(
       height: 38,
@@ -210,7 +175,7 @@ class _NavTileState extends State<_NavTile> {
       decoration: BoxDecoration(
         color: widget.selected
             ? c.surfaceBrand
-            : (_hovered && !widget.disabled)
+            : _hovered
             ? c.surfaceSunken
             : Colors.transparent,
         borderRadius: AgRadius.rSm,
@@ -233,9 +198,7 @@ class _NavTileState extends State<_NavTile> {
     );
 
     return MouseRegion(
-      cursor: widget.disabled
-          ? SystemMouseCursors.basic
-          : SystemMouseCursors.click,
+      cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(

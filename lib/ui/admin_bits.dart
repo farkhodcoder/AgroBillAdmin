@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/app_dimens.dart';
 import '../core/theme/app_typography.dart';
+import '../core/utils/formatters.dart';
 import 'admin_button.dart';
 import 'admin_field.dart';
 
@@ -141,6 +142,7 @@ class _AdminSearchFieldState extends State<AdminSearchField> {
         controller: _controller,
         label: '',
         hint: widget.hintKey.tr(),
+        reserveErrorSpace: false,
       ),
     );
   }
@@ -155,6 +157,7 @@ class AdminSelect<T> extends StatelessWidget {
     required this.onChanged,
     required this.hintKey,
     this.width = 180,
+    this.allLabelKey = 'admin.common.all',
   });
 
   final T? value;
@@ -162,6 +165,10 @@ class AdminSelect<T> extends StatelessWidget {
   final ValueChanged<T?> onChanged;
   final String hintKey;
   final double width;
+
+  /// `null` qiymatning yozuvi. Odatda "Hammasi", lekin ba'zi filtrlarda
+  /// `null` boshqa ma'noga ega (masalan support'da — faqat faol navbat).
+  final String allLabelKey;
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +210,7 @@ class AdminSelect<T> extends StatelessWidget {
         items: [
           DropdownMenuItem<T>(
             child: Text(
-              'admin.common.all'.tr(),
+              allLabelKey.tr(),
               style: AppTypography.bodySmall.copyWith(color: c.textSecondary),
             ),
           ),
@@ -350,6 +357,290 @@ class _ReasonDialogState extends State<_ReasonDialog> {
                     onPressed: _confirm,
                   ),
                 ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Forma oynasining umumiy qobig'i: sarlavha, izoh, maydonlar, tugmalar.
+///
+/// Har bir modul o'z `Dialog` + `Padding` + tugmalar qatorini yozsa, oynalar
+/// bir-biridan kenglik va oraliqda farq qilib qolardi.
+class AdminFormDialog extends StatelessWidget {
+  const AdminFormDialog({
+    super.key,
+    required this.title,
+    required this.confirmLabel,
+    required this.onConfirm,
+    required this.children,
+    this.subtitle,
+    this.showCancel = true,
+    this.maxWidth = 480,
+    this.busy = false,
+  });
+
+  final String title;
+  final String? subtitle;
+  final String confirmLabel;
+  final VoidCallback? onConfirm;
+  final List<Widget> children;
+  final bool showCancel;
+  final double maxWidth;
+  final bool busy;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Theme.of(context).extension<AppColors>()!;
+
+    return Dialog(
+      backgroundColor: c.surface,
+      shape: const RoundedRectangleBorder(borderRadius: AgRadius.rLg),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AgSpace.x6),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(title, style: AppTypography.h3.copyWith(color: c.text)),
+              if (subtitle != null) ...[
+                const SizedBox(height: AgSpace.x2),
+                Text(
+                  subtitle!,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: c.textSecondary,
+                  ),
+                ),
+              ],
+              const SizedBox(height: AgSpace.x5),
+              ...children,
+              const SizedBox(height: AgSpace.x2),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (showCancel) ...[
+                    AdminButton(
+                      label: 'admin.common.cancel'.tr(),
+                      kind: AdminButtonKind.ghost,
+                      onPressed: busy
+                          ? null
+                          : () => Navigator.of(context).pop(),
+                    ),
+                    const SizedBox(width: AgSpace.x2),
+                  ],
+                  AdminButton(
+                    label: confirmLabel,
+                    busy: busy,
+                    onPressed: onConfirm,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// O'ng tomondan chiqadigan tafsilot paneli — fon qoraytiriladi, tashqariga
+/// bosilsa yopiladi.
+///
+/// `Stack` ichida, sahifa kontentidan KEYIN qo'yiladi. [footer] — pastda
+/// qotib turadigan qism (javob maydoni, amal tugmalari); u [body] bilan
+/// birga aylanmaydi.
+class AdminSidePanel extends StatelessWidget {
+  const AdminSidePanel({
+    super.key,
+    required this.title,
+    required this.onClose,
+    required this.body,
+    this.subtitle,
+    this.badges = const [],
+    this.footer,
+    this.width = 540,
+  });
+
+  final String title;
+  final String? subtitle;
+  final List<Widget> badges;
+  final VoidCallback onClose;
+  final Widget body;
+  final Widget? footer;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Theme.of(context).extension<AppColors>()!;
+
+    return Positioned.fill(
+      child: Stack(
+        children: [
+          GestureDetector(
+            onTap: onClose,
+            child: Container(color: Colors.black.withValues(alpha: 0.35)),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Material(
+              color: c.surface,
+              elevation: 8,
+              child: SizedBox(
+                width: width,
+                height: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(AgSpace.x6),
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide(color: c.border)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: AppTypography.h3.copyWith(
+                                    color: c.text,
+                                  ),
+                                ),
+                                if (subtitle != null) ...[
+                                  const SizedBox(height: AgSpace.x1),
+                                  Text(
+                                    subtitle!,
+                                    style: AppTypography.caption.copyWith(
+                                      color: c.textTertiary,
+                                    ),
+                                  ),
+                                ],
+                                if (badges.isNotEmpty) ...[
+                                  const SizedBox(height: AgSpace.x2),
+                                  Wrap(
+                                    spacing: AgSpace.x1,
+                                    runSpacing: AgSpace.x1,
+                                    children: badges,
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: onClose,
+                            icon: Icon(
+                              Icons.close,
+                              size: 18,
+                              color: c.textTertiary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(child: body),
+                    if (footer != null)
+                      Container(
+                        padding: const EdgeInsets.all(AgSpace.x5),
+                        decoration: BoxDecoration(
+                          border: Border(top: BorderSide(color: c.border)),
+                        ),
+                        child: footer,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Panel ichidagi sarlavha + matn bloki.
+class AdminFactBlock extends StatelessWidget {
+  const AdminFactBlock({super.key, required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Theme.of(context).extension<AppColors>()!;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AgSpace.x5),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: AppTypography.label.copyWith(color: c.textSecondary),
+          ),
+          const SizedBox(height: AgSpace.x2),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
+/// Yozishma pufakchasi. [mine] — chap tomonda foydalanuvchi, o'ngda javob
+/// beruvchi (AI yoki xodim). Support moduli ham shu tartibda.
+class AdminChatBubble extends StatelessWidget {
+  const AdminChatBubble({
+    super.key,
+    required this.text,
+    required this.time,
+    required this.mine,
+    required this.label,
+    required this.colors,
+    this.highlighted = false,
+  });
+
+  final String text;
+  final DateTime time;
+  final bool mine;
+  final String label;
+  final AppColors colors;
+  final bool highlighted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: mine ? Alignment.centerLeft : Alignment.centerRight,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 460),
+        child: Container(
+          padding: const EdgeInsets.all(AgSpace.x4),
+          decoration: BoxDecoration(
+            color: mine ? colors.surfaceSunken : colors.surfaceBrand,
+            borderRadius: AgRadius.rMd,
+            border: highlighted
+                ? Border.all(color: colors.borderFocus, width: 1.5)
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$label · ${Fmt.dateTime(time)}',
+                style: AppTypography.caption.copyWith(
+                  color: colors.textTertiary,
+                ),
+              ),
+              const SizedBox(height: AgSpace.x1),
+              SelectableText(
+                text,
+                style: AppTypography.bodySmall.copyWith(color: colors.text),
               ),
             ],
           ),

@@ -128,6 +128,18 @@ abstract final class AdminRole {
     contentManager,
     analyst,
   ];
+
+  /// Panel orqali berilishi mumkin bo'lgan rollar. Asoschi yagona va uni
+  /// hech kim bermaydi (0043, `FOUNDER_IS_UNIQUE`) — tanlovda ko'rsatilsa
+  /// admin har safar server xatosiga urilardi.
+  static const assignable = <String>[
+    superAdmin,
+    admin,
+    moderator,
+    supportAgent,
+    contentManager,
+    analyst,
+  ];
 }
 
 /// Joriy adminning ruxsatlari.

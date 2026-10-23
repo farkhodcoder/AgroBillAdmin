@@ -1,3 +1,4 @@
+import '../../core/i18n/ref_name.dart';
 import '../../core/supabase/db.dart';
 import '../../core/utils/result.dart';
 
@@ -34,7 +35,7 @@ class WeatherAlert {
       message: json['message'] as String? ?? '',
       createdAt: DateTime.parse(json['created_at'] as String),
       regionId: (json['region_id'] as num?)?.toInt(),
-      regionName: region?['name_$locale'] as String?,
+      regionName: refName(region, locale),
       farmId: json['farm_id'] as String?,
       startsAt: json['starts_at'] == null
           ? null

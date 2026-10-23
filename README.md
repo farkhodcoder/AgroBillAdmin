@@ -24,12 +24,12 @@ Texnik topshiriq: [`../../agrobill/docs/ADMIN_TTZ.md`](../../agrobill/docs/ADMIN
 | 5 — AI monitoringi · Kasallik bazasi · Audit | ✅ |
 | 6 — Xodimlar · Sozlamalar · Kontent | ✅ |
 | 7 — Ob-havo · Tahlil · Kampaniyalar · Edge Functions | ✅ deploy qilingan |
-| Qolgani — Support | ⬜ |
+| 8 — Support · xodim akkauntlari · AI savollari va skan rasmlari · kasallik muharriri | ✅ (`0044` qo'llanishi kerak) |
 
-**14 modul ishlaydi.** Yagona qolgani — **Support** (§6.12): jadvallar
-bazada tayyor (`support_tickets`, 0012), lekin mobil ilovada «Yordam»
-ekrani yo'q, ya'ni ticket yaratadigan hech kim yo'q. Admin tomonini avval
-qurish bo'sh ro'yxat bilan tugardi.
+**15 modul ishlaydi.** **Support** (§6.12) admin tomoni tayyor: navbat,
+yozishma, mas'ul biriktirish, holat va muhimlik. Lekin mobil ilovada «Yordam»
+ekrani hali yo'q, ya'ni ticket yaratadigan hech kim yo'q — ro'yxat bo'sh
+turadi va ekranda buning sababi aytilgan.
 
 **Edge Functions (TTZ §5.9) — beshtasi ham deploy qilingan.** Har biri
 ruxsatni foydalanuvchi tokeni bilan tekshiradi va yetmasa
@@ -59,8 +59,11 @@ faqat nizoli holatda bekor qila oladi.
 > **To'lov holati yo'q.** `orders` da to'lovga oid ustun umuman yo'q va
 > to'lov tizimi ulanmagan — TTZ §6.5 buni ataylab qamrovdan chiqargan.
 
-**AI monitoringi** — ikkita ko'rinish: kunlik foydalanish (kim qancha
-so'ramoqda) va skanlar (nima aniqlandi, qaysi model, qancha vaqtda). Tepada
+**AI monitoringi** — uchta ko'rinish: kunlik foydalanish (kim qancha
+so'ramoqda), savollar (foydalanuvchilar nima so'ragan, to'liq suhbat bilan —
+`ai.moderate` ruxsati) va skanlar (rasm, nima aniqlandi, alomatlar, davolash,
+qaysi model, qancha vaqtda). Skan rasmlari `0044` migratsiyasidan keyin
+`ai.read`/`disease.read` bilan ochiladi. Tepada
 model taqsimoti: zanjirda kvota tugaganda ilova keyingi modelga tushadi,
 shuning uchun taqsimotning o'zgarishi kvota muammosining birinchi belgisi.
 
@@ -68,7 +71,8 @@ shuning uchun taqsimotning o'zgarishi kvota muammosining birinchi belgisi.
 > mavjud emas; ularni qo'shish mobil ilovada ham o'zgarish talab qiladi
 > (TTZ §6.6, P1). Hozircha `model_version` va `latency_ms` kuzatiladi.
 
-**Kasallik bazasi** — `disease_reference` ro'yxati, nashr holati
+**Kasallik bazasi** — yangi kasallik qo'shish va tahrirlash (uch tilda nom,
+tavsif, alomatlar, davolash qadamlari; yangi yozuv `draft`), ro'yxat, nashr holati
 (`draft/review/published/archived`) va tarjima to'liqligi belgisi.
 Holat `admin_publish_disease()` orqali o'zgaradi.
 
@@ -78,7 +82,9 @@ qo'shilganda filtr eskirib qolmasin. Tafsilotda `old_value`/`new_value`
 farqi ko'rsatiladi. Faqat o'qish — yozuv 0010 dagi triggerlar bilan
 o'zgarmas.
 
-**Xodimlar** — ro'yxat, rol berish/olib tashlash, kirish jurnali va
+**Xodimlar** — email + parol bilan yangi xodim yaratish (`admin-staff`),
+parolni almashtirish, vaqtincha to'xtatish/qayta yoqish
+(`admin_set_staff_active`), ro'yxat, rol berish/olib tashlash, kirish jurnali va
 **rol × ruxsat matritsasi**. Matritsa bazadan o'qiladi, kodda qat'iy
 yozilmagan: `admin_role_permissions` qo'lda o'zgartirilsa admin shuni
 ko'rishi kerak, hujjatga qarab noto'g'ri xulosa chiqarmasin.

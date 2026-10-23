@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/supabase/admin_config.dart';
 import '../../../core/utils/result.dart';
+import '../../../core/utils/safe_emit.dart';
 import '../../../data/models/admin_user.dart';
 import '../../../data/repositories/admin_user_repository.dart';
 
@@ -73,11 +74,16 @@ class UsersState extends Equatable {
   ];
 }
 
-class UsersCubit extends Cubit<UsersState> {
+class UsersCubit extends Cubit<UsersState> with SafeEmit<UsersState> {
   UsersCubit(this._repo, this._locale) : super(const UsersState());
 
   final AdminUserRepository _repo;
   final String _locale;
+
+  /// So'nggi `load()` tartib raqami. Qidiruv yoki sahifa tez almashganda
+  /// javoblar tartibsiz keladi — kechikkan eski javob yangisini bosib ketib,
+  /// jadval filtrga mos kelmay qolardi.
+  int _loadSeq = 0;
 
   Future<void> init() async {
     final regionsRes = await _repo.regions(locale: _locale);
@@ -86,6 +92,7 @@ class UsersCubit extends Cubit<UsersState> {
   }
 
   Future<void> load() async {
+    final seq = ++_loadSeq;
     emit(state.copyWith(loading: true, clearFailure: true));
 
     final res = await _repo.list(
@@ -93,6 +100,7 @@ class UsersCubit extends Cubit<UsersState> {
       page: state.page,
       locale: _locale,
     );
+    if (seq != _loadSeq) return;
 
     switch (res) {
       case Ok(:final value):

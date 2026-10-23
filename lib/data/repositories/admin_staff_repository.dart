@@ -1,3 +1,4 @@
+import '../../core/i18n/ref_name.dart';
 import '../../core/supabase/db.dart';
 import '../../core/utils/result.dart';
 import '../models/admin_staff.dart';
@@ -51,7 +52,7 @@ class AdminStaffRepository {
           for (final r in roleRows)
             RoleWithPermissions(
               code: r['code'] as String,
-              name: r['name_$locale'] as String,
+              name: refName(r, locale) ?? r['code'] as String,
               permissions: byRole[r['code']] ?? const <String>{},
             ),
         ];
@@ -92,6 +93,64 @@ class AdminStaffRepository {
       },
     );
   });
+
+  /// Yangi xodim akkaunti: email + parol + rol (`admin-staff`, 0043).
+  ///
+  /// Akkaunt `service_role` bilan yaratiladi, rol esa funksiya ichida
+  /// FOYDALANUVCHI TOKENI bilan `admin_set_role` orqali beriladi — ruxsat,
+  /// founder qoidasi va audit bazadagi yagona nusxadan o'tadi. Rol
+  /// berilmasa funksiya akkauntni o'zi o'chiradi.
+  Future<Result<void>> createStaff({
+    required String email,
+    required String password,
+    required String fullName,
+    required String roleCode,
+    required String reason,
+  }) => guard(() async {
+    await Db.client.functions.invoke(
+      'admin-staff',
+      body: {
+        'action': 'create',
+        'email': email,
+        'password': password,
+        'full_name': fullName,
+        'role_code': roleCode,
+        'reason': reason,
+      },
+    );
+  });
+
+  /// Xodim parolini almashtirish (`admin-staff`, `set_password`).
+  ///
+  /// Ochiq sessiyalar uzilmaydi — kirishni darhol yopish uchun [setActive].
+  Future<Result<void>> setPassword(
+    String userId,
+    String password,
+    String reason,
+  ) => guard(() async {
+    await Db.client.functions.invoke(
+      'admin-staff',
+      body: {
+        'action': 'set_password',
+        'user_id': userId,
+        'password': password,
+        'reason': reason,
+      },
+    );
+  });
+
+  /// Xodimni to'xtatish / qayta yoqish (`admin_set_staff_active`, 0043).
+  ///
+  /// Rolni olib tashlashdan yumshoqroq: rol saqlanadi, faqat kirish yopiladi.
+  /// `admin_has()` har so'rovda `is_active` ga qaraydi, ya'ni ochiq sessiya
+  /// ham darhol hech narsa qila olmay qoladi.
+  Future<Result<void>> setActive(String userId, bool active, String reason) =>
+      guard(() async {
+        await Db.client.rpc(
+          'admin_set_staff_active',
+          params: {'p_user_id': userId, 'p_active': active, 'p_reason': reason},
+        );
+      });
 
   // --- Sozlamalar -------------------------------------------------------------
 

@@ -14,6 +14,7 @@ import '../../../data/repositories/admin_ai_repository.dart';
 import '../../../ui/admin_bits.dart';
 import '../../../ui/admin_button.dart';
 import '../../../ui/admin_feedback.dart';
+import '../../../ui/admin_field.dart';
 import '../../../ui/admin_table.dart';
 import '../cubit/disease_cubit.dart';
 
@@ -37,7 +38,7 @@ class DiseasePage extends StatelessWidget {
         create: (_) => DiseaseCubit(
           getIt<AdminAiRepository>(),
           context.locale.languageCode,
-        )..load(),
+        )..init(),
         child: const _DiseaseView(),
       ),
     );
@@ -79,6 +80,17 @@ class _DiseaseView extends StatelessWidget {
                   AdminPageHeader(
                     title: 'admin.nav.disease'.tr(),
                     subtitle: 'admin.disease.subtitle'.tr(),
+                    actions: [
+                      PermissionGuard(
+                        permission: AdminPermission.diseaseWrite,
+                        fallback: const SizedBox.shrink(),
+                        child: AdminButton(
+                          label: 'admin.disease.add'.tr(),
+                          icon: Icons.add,
+                          onPressed: () => _openEditor(context, null),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: AgSpace.x5),
 
@@ -291,6 +303,7 @@ class _DetailPanel extends StatelessWidget {
                               'admin.disease.prevention',
                               disease.prevention,
                             ),
+                            _DiseaseBody(disease: disease, colors: c),
                             const SizedBox(height: AgSpace.x5),
                             _StatusActions(disease: disease),
                           ],
@@ -404,6 +417,377 @@ class _StatusActions extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+Future<void> _openEditor(BuildContext context, DiseaseRow? row) async {
+  final cubit = context.read<DiseaseCubit>();
+
+  final draft = await showDialog<DiseaseDraft>(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => _DiseaseEditor(row: row, crops: cubit.state.crops),
+  );
+  if (draft == null) return;
+
+  final ok = await cubit.save(row?.id, draft);
+  if (!ok || !context.mounted) return;
+
+  final c = Theme.of(context).extension<AppColors>()!;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      backgroundColor: c.successBg,
+      content: Text(
+        row == null ? 'admin.disease.created'.tr() : 'admin.disease.saved'.tr(),
+        style: AppTypography.bodySmall.copyWith(color: c.successText),
+      ),
+    ),
+  );
+}
+
+/// Alomatlar va davolash qadamlari — panelda o'qish uchun.
+class _DiseaseBody extends StatelessWidget {
+  const _DiseaseBody({required this.disease, required this.colors});
+
+  final DiseaseRow disease;
+  final AppColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = AppTypography.bodySmall.copyWith(color: colors.text);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (disease.symptoms.isNotEmpty)
+          AdminFactBlock(
+            label: 'admin.disease.symptoms'.tr(),
+            child: Text(
+              disease.symptoms.map((s) => '•  $s').join('\n'),
+              style: style,
+            ),
+          ),
+        if (disease.treatments.isNotEmpty)
+          AdminFactBlock(
+            label: 'admin.disease.treatments'.tr(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                for (final (i, t) in disease.treatments.indexed)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AgSpace.x2),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${i + 1}. ${t.title}', style: style),
+                        if (t.detail.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(left: AgSpace.x4),
+                            child: Text(
+                              t.detail,
+                              style: AppTypography.caption.copyWith(
+                                color: colors.textSecondary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        PermissionGuard(
+          permission: AdminPermission.diseaseWrite,
+          fallback: const SizedBox.shrink(),
+          child: AdminButton(
+            label: 'admin.disease.edit'.tr(),
+            icon: Icons.edit_outlined,
+            kind: AdminButtonKind.secondary,
+            onPressed: () => _openEditor(context, disease),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Kasallik maqolasi muharriri — uch tilda nom, tavsif, alomatlar va
+/// davolash qadamlari.
+///
+/// Yangi yozuv `draft` bo'lib yaratiladi va mobil ilovada ko'rinmaydi:
+/// nashr — alohida, ongli qadam (`admin_publish_disease`, auditga tushadi).
+class _DiseaseEditor extends StatefulWidget {
+  const _DiseaseEditor({required this.row, required this.crops});
+
+  final DiseaseRow? row;
+  final List<CropOption> crops;
+
+  @override
+  State<_DiseaseEditor> createState() => _DiseaseEditorState();
+}
+
+class _DiseaseEditorState extends State<_DiseaseEditor> {
+  late final _code = TextEditingController(text: widget.row?.code);
+  late final _latin = TextEditingController(text: widget.row?.latinName);
+  late final _nameUz = TextEditingController(text: widget.row?.nameUz);
+  late final _nameRu = TextEditingController(text: widget.row?.nameRu);
+  late final _nameEn = TextEditingController(text: widget.row?.nameEn);
+  late final _description = TextEditingController(
+    text: widget.row?.description,
+  );
+  late final _causes = TextEditingController(text: widget.row?.causes);
+  late final _prevention = TextEditingController(text: widget.row?.prevention);
+  late final _symptoms = TextEditingController(
+    text: widget.row?.symptoms.join('\n'),
+  );
+  late final List<(TextEditingController, TextEditingController)> _steps = [
+    for (final t in widget.row?.treatments ?? const <TreatmentStep>[])
+      (
+        TextEditingController(text: t.title),
+        TextEditingController(text: t.detail),
+      ),
+  ];
+  late int? _cropId = widget.row?.cropTypeId;
+  final _errors = <String, String>{};
+
+  /// `code` — mobil ilova va AI javoblari shu kalit orqali bog'lanadi,
+  /// shuning uchun faqat lotin kichik harf, raqam va `_`.
+  static final _codeRe = RegExp(r'^[a-z0-9_]{3,60}$');
+
+  @override
+  void dispose() {
+    for (final c in [
+      _code,
+      _latin,
+      _nameUz,
+      _nameRu,
+      _nameEn,
+      _description,
+      _causes,
+      _prevention,
+      _symptoms,
+    ]) {
+      c.dispose();
+    }
+    for (final (a, b) in _steps) {
+      a.dispose();
+      b.dispose();
+    }
+    super.dispose();
+  }
+
+  void _submit() {
+    setState(() {
+      _errors.clear();
+      if (!_codeRe.hasMatch(_code.text.trim())) {
+        _errors['code'] = 'admin.disease.code_invalid'.tr();
+      }
+      if (_nameUz.text.trim().length < 2) {
+        _errors['name_uz'] = 'admin.disease.name_required'.tr();
+      }
+    });
+    if (_errors.isNotEmpty) return;
+
+    Navigator.of(context).pop(
+      DiseaseDraft(
+        code: _code.text,
+        nameUz: _nameUz.text,
+        nameRu: _nameRu.text,
+        nameEn: _nameEn.text,
+        cropTypeId: _cropId,
+        latinName: _latin.text,
+        description: _description.text,
+        causes: _causes.text,
+        prevention: _prevention.text,
+        symptoms: [
+          for (final line in _symptoms.text.split('\n'))
+            if (line.trim().isNotEmpty) line.trim(),
+        ],
+        treatments: [
+          for (final (title, detail) in _steps)
+            if (title.text.trim().isNotEmpty)
+              TreatmentStep(
+                title: title.text.trim(),
+                detail: detail.text.trim(),
+              ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = Theme.of(context).extension<AppColors>()!;
+
+    Widget pair(Widget a, Widget b) => Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: a),
+        const SizedBox(width: AgSpace.x3),
+        Expanded(child: b),
+      ],
+    );
+
+    final names = [
+      ('UZ', _nameUz, _errors['name_uz']),
+      ('RU', _nameRu, null),
+      ('EN', _nameEn, null),
+    ];
+
+    return AdminFormDialog(
+      title: widget.row == null
+          ? 'admin.disease.add'.tr()
+          : 'admin.disease.edit'.tr(),
+      subtitle: widget.row == null ? 'admin.disease.add_hint'.tr() : null,
+      confirmLabel: 'admin.disease.save'.tr(),
+      maxWidth: 760,
+      onConfirm: _submit,
+      children: [
+        pair(
+          AdminField(
+            controller: _code,
+            label: 'admin.disease.code'.tr(),
+            hint: 'wheat_leaf_rust',
+            // Kod bog'lanish kaliti — yaratilgandan keyin o'zgarmaydi.
+            enabled: widget.row == null,
+            errorText: _errors['code'],
+          ),
+          AdminField(
+            controller: _latin,
+            label: 'admin.disease.latin'.tr(),
+            hint: 'Puccinia triticina',
+          ),
+        ),
+        Text(
+          'admin.disease.col_crop'.tr(),
+          style: AppTypography.label.copyWith(color: c.textSecondary),
+        ),
+        const SizedBox(height: AgSpace.x2),
+        AdminSelect<int>(
+          value: _cropId,
+          hintKey: 'admin.disease.col_crop',
+          width: 320,
+          items: [for (final crop in widget.crops) (crop.id, crop.name)],
+          onChanged: (v) => setState(() => _cropId = v),
+        ),
+        const SizedBox(height: AgSpace.x4),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final (i, (lang, ctrl, err)) in names.indexed) ...[
+              if (i > 0) const SizedBox(width: AgSpace.x3),
+              Expanded(
+                child: AdminField(
+                  controller: ctrl,
+                  label: '${'admin.disease.col_name'.tr()} · $lang',
+                  errorText: err,
+                ),
+              ),
+            ],
+          ],
+        ),
+        AdminField(
+          controller: _description,
+          label: 'admin.disease.description'.tr(),
+          maxLines: 4,
+          minLines: 2,
+        ),
+        pair(
+          AdminField(
+            controller: _causes,
+            label: 'admin.disease.causes'.tr(),
+            maxLines: 4,
+            minLines: 2,
+          ),
+          AdminField(
+            controller: _prevention,
+            label: 'admin.disease.prevention'.tr(),
+            maxLines: 4,
+            minLines: 2,
+          ),
+        ),
+        AdminField(
+          controller: _symptoms,
+          label: 'admin.disease.symptoms_hint'.tr(),
+          maxLines: 6,
+          minLines: 3,
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'admin.disease.treatments'.tr(),
+                style: AppTypography.label.copyWith(color: c.textSecondary),
+              ),
+            ),
+            AdminButton(
+              label: 'admin.disease.add_step'.tr(),
+              icon: Icons.add,
+              kind: AdminButtonKind.ghost,
+              onPressed: () => setState(
+                () => _steps.add((
+                  TextEditingController(),
+                  TextEditingController(),
+                )),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AgSpace.x2),
+        for (final (i, (title, detail)) in _steps.indexed)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: AgSpace.x3),
+                child: SizedBox(
+                  width: 24,
+                  child: Text(
+                    '${i + 1}.',
+                    style: AppTypography.bodySmall.copyWith(
+                      color: c.textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: AdminField(
+                  controller: title,
+                  label: '',
+                  hint: 'admin.disease.step_title'.tr(),
+                ),
+              ),
+              const SizedBox(width: AgSpace.x2),
+              Expanded(
+                flex: 3,
+                child: AdminField(
+                  controller: detail,
+                  label: '',
+                  hint: 'admin.disease.step_detail'.tr(),
+                ),
+              ),
+              IconButton(
+                tooltip: 'admin.disease.remove_step'.tr(),
+                onPressed: () => setState(() {
+                  final (a, b) = _steps.removeAt(i);
+                  a.dispose();
+                  b.dispose();
+                }),
+                icon: Icon(Icons.close, size: 16, color: c.textTertiary),
+              ),
+            ],
+          ),
+        if (_steps.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AgSpace.x4),
+            child: Text(
+              'admin.disease.no_steps'.tr(),
+              style: AppTypography.caption.copyWith(color: c.textTertiary),
+            ),
+          ),
+      ],
     );
   }
 }

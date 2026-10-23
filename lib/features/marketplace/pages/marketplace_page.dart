@@ -29,6 +29,16 @@ BadgeTone listingTone(String status) => switch (status) {
   _ => BadgeTone.neutral,
 };
 
+/// E'lon narxi matni — jadval va panelda bir xil.
+///
+/// Ijarada narx oylik to'lov: "/oy" belgisisiz moderator 2 mln lik oylik
+/// ijarani 2 mln lik sotuv deb o'qib, narxni noto'g'ri baholardi.
+String listingPrice(AdminListingRow row) {
+  final price = Fmt.price(row.price);
+  if (row.kind != ListingKind.rent || row.isNegotiable) return price;
+  return '$price ${'admin.market.per_month'.tr()}';
+}
+
 /// Bozor moderatsiyasi (TTZ §6.4).
 class MarketplacePage extends StatelessWidget {
   const MarketplacePage({super.key});
@@ -126,6 +136,7 @@ class _MarketplaceView extends StatelessWidget {
                 imageUrls: state.imageUrls,
                 history: state.history,
                 loading: state.detailLoading,
+                acting: state.acting,
                 onClose: cubit.closeDetail,
               ),
           ],
@@ -173,7 +184,8 @@ class _MarketplaceView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            Fmt.price(row.price),
+            listingPrice(row),
+            overflow: TextOverflow.ellipsis,
             style: AppTypography.bodySmall.copyWith(color: c.text),
           ),
           Text(

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/supabase/admin_config.dart';
 import '../../../core/utils/result.dart';
+import '../../../core/utils/safe_emit.dart';
 import '../../../data/models/admin_order.dart';
 import '../../../data/repositories/admin_order_repository.dart';
 
@@ -85,15 +86,22 @@ class OrdersState extends Equatable {
   ];
 }
 
-class OrdersCubit extends Cubit<OrdersState> {
+class OrdersCubit extends Cubit<OrdersState> with SafeEmit<OrdersState> {
   OrdersCubit(this._repo) : super(const OrdersState());
 
   final AdminOrderRepository _repo;
 
+  /// So'nggi `load()` tartib raqami. Qidiruv yoki sahifa tez almashganda
+  /// javoblar tartibsiz keladi — kechikkan eski javob yangisini bosib ketib,
+  /// jadval filtrga mos kelmay qolardi.
+  int _loadSeq = 0;
+
   Future<void> load() async {
+    final seq = ++_loadSeq;
     emit(state.copyWith(loading: true, clearFailure: true));
 
     final res = await _repo.list(filter: state.filter, page: state.page);
+    if (seq != _loadSeq) return;
 
     switch (res) {
       case Ok(:final value):
@@ -135,6 +143,8 @@ class OrdersCubit extends Cubit<OrdersState> {
       _repo.history(orderId),
       _repo.reviews(orderId),
     ]);
+    // Boshqa buyurtma ochilgan yoki panel yopilgan — eski natija kerak emas.
+    if (state.selectedId != orderId) return;
 
     emit(
       state.copyWith(

@@ -1,3 +1,5 @@
+import '../../core/i18n/ref_name.dart';
+
 /// Foydalanuvchi ro'yxati qatori.
 ///
 /// `profiles` + `regions` (nom uchun) + `subscriptions` (premium belgisi).
@@ -51,8 +53,8 @@ class AdminUserRow {
       deletedAt: json['deleted_at'] == null
           ? null
           : DateTime.parse(json['deleted_at'] as String),
-      regionName: region?['name_$locale'] as String?,
-      districtName: district?['name_$locale'] as String?,
+      regionName: refName(region, locale),
+      districtName: refName(district, locale),
       isPremium: premium,
       rating: _num(json['rating']),
       ratingCount: (json['rating_count'] as num?)?.toInt() ?? 0,
