@@ -42,9 +42,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Versiya QOTIRILGAN: `stable` ning yangi relizi (3.47+) material.dart
+      # importini eskirgan deb belgiladi va `flutter analyze` deploy'ni
+      # to'xtatdi. Yangilash — lokalda tekshirib, shu raqamni o'zgartirish.
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version: 3.44.4
           cache: true
 
       - run: flutter pub get
