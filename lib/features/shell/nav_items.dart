@@ -59,6 +59,18 @@ const adminNavigation = <NavGroup>[
         permissions: [AdminPermission.usersRead],
       ),
       NavItem(
+        route: AdminRoutes.verification,
+        labelKey: 'admin.nav.verification',
+        icon: Icons.verified_user_outlined,
+        permissions: [AdminPermission.usersRead],
+      ),
+      NavItem(
+        route: AdminRoutes.deletions,
+        labelKey: 'admin.nav.deletions',
+        icon: Icons.person_remove_outlined,
+        permissions: [AdminPermission.usersRead],
+      ),
+      NavItem(
         route: AdminRoutes.farms,
         labelKey: 'admin.nav.farms',
         icon: Icons.agriculture_outlined,
@@ -76,9 +88,27 @@ const adminNavigation = <NavGroup>[
         permissions: [AdminPermission.listingsRead],
       ),
       NavItem(
+        route: AdminRoutes.requests,
+        labelKey: 'admin.nav.requests',
+        icon: Icons.shopping_basket_outlined,
+        permissions: [AdminPermission.listingsRead],
+      ),
+      NavItem(
+        route: AdminRoutes.moderation,
+        labelKey: 'admin.nav.moderation',
+        icon: Icons.shield_outlined,
+        permissions: [AdminPermission.listingsModerate],
+      ),
+      NavItem(
         route: AdminRoutes.orders,
         labelKey: 'admin.nav.orders',
         icon: Icons.receipt_long_outlined,
+        permissions: [AdminPermission.ordersRead],
+      ),
+      NavItem(
+        route: AdminRoutes.disputes,
+        labelKey: 'admin.nav.disputes',
+        icon: Icons.gavel_outlined,
         permissions: [AdminPermission.ordersRead],
       ),
     ],
@@ -102,6 +132,12 @@ const adminNavigation = <NavGroup>[
         route: AdminRoutes.content,
         labelKey: 'admin.nav.content',
         icon: Icons.article_outlined,
+        permissions: [AdminPermission.contentRead],
+      ),
+      NavItem(
+        route: AdminRoutes.news,
+        labelKey: 'admin.nav.news',
+        icon: Icons.newspaper_outlined,
         permissions: [AdminPermission.contentRead],
       ),
       NavItem(

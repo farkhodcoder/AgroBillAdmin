@@ -7,7 +7,9 @@ import '../../../core/supabase/db.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_dimens.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../data/repositories/admin_auth_repository.dart';
 import '../../auth/cubit/admin_auth_cubit.dart';
+import '../../auth/widgets/account_dialogs.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../ui/theme_switch.dart';
 import '../../auth/widgets/language_switch.dart';
@@ -42,6 +44,7 @@ class TopBar extends StatelessWidget {
             email: Db.currentUser?.email ?? '',
             roleCode: state.permissions.roleCode,
             colors: c,
+            mfaEnabled: getIt<AdminAuthRepository>().hasTotp,
           ),
         ],
       ),
@@ -54,11 +57,30 @@ class _ProfileMenu extends StatelessWidget {
     required this.email,
     required this.roleCode,
     required this.colors,
+    required this.mfaEnabled,
   });
 
   final String email;
   final String? roleCode;
   final AppColors colors;
+  final bool mfaEnabled;
+
+  PopupMenuItem<String> _item(String value, IconData icon, String labelKey) =>
+      PopupMenuItem(
+        value: value,
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: colors.textSecondary),
+            const SizedBox(width: AgSpace.x3),
+            Text(
+              labelKey.tr(),
+              style: AppTypography.bodySmall.copyWith(
+                color: colors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -68,8 +90,13 @@ class _ProfileMenu extends StatelessWidget {
       color: colors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AgRadius.rMd),
       onSelected: (value) {
-        if (value == 'sign_out') {
-          context.read<AdminAuthCubit>().signOut();
+        switch (value) {
+          case 'password':
+            showChangePasswordDialog(context);
+          case 'mfa':
+            showMfaSetupDialog(context);
+          case 'sign_out':
+            context.read<AdminAuthCubit>().signOut();
         }
       },
       itemBuilder: (context) => [
@@ -95,21 +122,33 @@ class _ProfileMenu extends StatelessWidget {
           ),
         ),
         const PopupMenuDivider(),
-        PopupMenuItem(
-          value: 'sign_out',
-          child: Row(
-            children: [
-              Icon(Icons.logout, size: 16, color: colors.textSecondary),
-              const SizedBox(width: AgSpace.x3),
-              Text(
-                'admin.auth.sign_out'.tr(),
-                style: AppTypography.bodySmall.copyWith(
-                  color: colors.textSecondary,
+        _item('password', Icons.key_outlined, 'admin.account.change_password'),
+        // Ulangan 2FA ni bu yerdan o'chirib bo'lmaydi: telefon yo'qolsa
+        // tiklash yo'li 0067 migratsiyasi boshida yozilgan.
+        if (mfaEnabled)
+          PopupMenuItem(
+            enabled: false,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.verified_user_outlined,
+                  size: 16,
+                  color: colors.successText,
                 ),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(width: AgSpace.x3),
+                Text(
+                  'admin.mfa.enabled'.tr(),
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.successText,
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          _item('mfa', Icons.shield_outlined, 'admin.mfa.setup'),
+        const PopupMenuDivider(),
+        _item('sign_out', Icons.logout, 'admin.auth.sign_out'),
       ],
       child: Row(
         children: [

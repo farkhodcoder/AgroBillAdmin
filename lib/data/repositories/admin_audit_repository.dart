@@ -123,7 +123,7 @@ class AdminAuditRepository {
         .select(
           'id, scope, action, target_type, target_id, reason, actor_role, '
           'old_value, new_value, ip_address, user_agent, created_at, '
-          'profiles(full_name, email)',
+          'profiles:staff_profiles(full_name, email)',
         )
         .eq('scope', 'admin');
 

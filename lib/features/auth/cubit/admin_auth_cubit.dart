@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../core/errors/admin_error_codes.dart';
 import '../../../core/i18n/admin_locales.dart';
 import '../../../core/rbac/permission.dart';
+import '../../../core/security/idle_guard.dart';
 import '../../../core/supabase/db.dart';
 import '../../../core/utils/result.dart';
 import '../../../data/repositories/admin_auth_repository.dart';
@@ -20,10 +21,18 @@ part 'admin_auth_state.dart';
 /// buyruq beradi. Bosqichni ekranlar emas, `resolveStage()` hal qiladi —
 /// yagona haqiqat manbai.
 class AdminAuthCubit extends Cubit<AdminAuthState> {
-  AdminAuthCubit(this._repo) : super(const AdminAuthState());
+  AdminAuthCubit(this._repo) : super(const AdminAuthState()) {
+    _idle = IdleGuard(onTimeout: () => unawaited(signOut(idle: true)));
+  }
 
   final AdminAuthRepository _repo;
+  late final IdleGuard _idle;
   StreamSubscription<dynamic>? _authSub;
+
+  static const _lockedFailure = AppFailure(
+    FailureKind.rateLimit,
+    'admin.errors.login_locked',
+  );
 
   /// `main()` dan keyin bir marta. Mavjud sessiyani tiklaydi va Supabase
   /// hodisalariga obuna bo'ladi.
@@ -39,6 +48,7 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
       // router darhol kirish ekraniga qaytarsin.
       if (Db.currentUser == null) {
         if (state.stage != AuthStage.signedOut) {
+          _idle.stop();
           emit(
             state.copyWith(
               stage: AuthStage.signedOut,
@@ -61,6 +71,14 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
       }
     });
 
+    // Brauzer yopilib, ancha keyin qayta ochilgan: saqlangan sessiya bilan
+    // panel to'g'ridan-to'g'ri ochilmasin. `signOut` o'zi `bootstrapped` ni
+    // qo'yadi va kirish ekranida sababni ko'rsatadi.
+    if (Db.currentUser != null && _idle.expired) {
+      await signOut(idle: true);
+      return;
+    }
+
     await _refresh(markBootstrapped: true);
   }
 
@@ -68,12 +86,45 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
   Future<void> signIn({required String email, required String password}) async {
     emit(state.copyWith(busy: true, clearFailure: true));
 
+    // Ketma-ket xatodan keyingi vaqtinchalik blok. Funksiya javob bermasa
+    // (`null`) kirish davom etadi — `loginGuard` izohiga qarang.
+    final before = await _repo.loginGuard('check', email);
+    if (before?.locked ?? false) {
+      emit(state.copyWith(busy: false, failure: _lockedFailure));
+      return;
+    }
+
     final res = await _repo.signIn(email: email, password: password);
     if (res case Fail(:final failure)) {
-      // Parol xato — urinish jurnalga tushmaydi, chunki sessiya hosil
-      // bo'lmagan va `admin_record_login()` `auth.uid()` ni talab qiladi.
-      // Parol bosqichidagi urinishlarni yozish TTZ §5.9 bo'yicha Edge
-      // Function ishi.
+      // Parol bosqichida sessiya yo'q, `admin_record_login()` esa
+      // `auth.uid()` ni talab qiladi — shuning uchun urinishni Edge
+      // Function yozadi.
+      var shown = failure;
+      if (failure.messageKey == 'admin.errors.invalid_credentials') {
+        final after = await _repo.loginGuard('fail', email);
+        if (after?.locked ?? false) shown = _lockedFailure;
+      }
+      emit(state.copyWith(busy: false, failure: shown));
+      return;
+    }
+
+    await _refresh(recordSuccess: true);
+  }
+
+  /// Kirishdagi ikkinchi bosqich — authenticator kodi.
+  Future<void> verifyMfa(String code) async {
+    emit(state.copyWith(busy: true, clearFailure: true));
+
+    final res = await _repo.verifyMfa(code);
+    if (res case Fail(:final failure)) {
+      // Sessiya bor (parol to'g'ri), shuning uchun RPC yoza oladi: parolni
+      // bilgan, lekin kodni topa olmayotgan urinish jurnalda ko'rinsin.
+      unawaited(
+        _repo.recordLogin(
+          success: false,
+          failureCode: AdminErrorCode.mfaFailed,
+        ),
+      );
       emit(state.copyWith(busy: false, failure: failure));
       return;
     }
@@ -81,11 +132,30 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
     await _refresh(recordSuccess: true);
   }
 
-  Future<void> signOut() async {
+  /// 2FA ulash tugagach (yoki tashqaridan holat o'zgargach) bosqichni
+  /// qayta aniqlaydi.
+  Future<void> refresh({bool recordSuccess = false}) =>
+      _refresh(recordSuccess: recordSuccess);
+
+  /// [idle] — harakatsizlik sababli avtomatik chiqish: kirish ekranida
+  /// sababi aytiladi, aks holda admin "nega chiqib ketdim" deb o'ylaydi.
+  Future<void> signOut({bool idle = false}) async {
+    _idle.reset();
     emit(state.copyWith(busy: true, clearFailure: true));
     await _repo.signOut();
-    emit(const AdminAuthState(stage: AuthStage.signedOut, bootstrapped: true));
+    emit(
+      AdminAuthState(
+        stage: AuthStage.signedOut,
+        bootstrapped: true,
+        failure: idle
+            ? const AppFailure(FailureKind.auth, 'admin.auth.idle_signed_out')
+            : null,
+      ),
+    );
   }
+
+  /// Foydalanuvchi faolligi (sichqoncha, klaviatura) — `AppShell` chaqiradi.
+  void touch() => _idle.touch();
 
   /// Interfeys tilini o'zgartiradi va bazaga saqlaydi.
   ///
@@ -131,6 +201,7 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
     final stage = stageRes.valueOrNull!;
 
     if (stage != AuthStage.ready) {
+      _idle.stop();
       // Xodim emasligi ham jurnalga tushadi — kim urinayotgani ko'rinsin.
       if (stage == AuthStage.notAdmin) {
         unawaited(
@@ -144,6 +215,9 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
         state.copyWith(
           stage: stage,
           busy: false,
+          // Parol bosqichidagi xato 2FA ekraniga ko'chib o'tmasin; chiqish
+          // sababi (masalan, harakatsizlik) esa kirish ekranida qolsin.
+          clearFailure: stage != AuthStage.signedOut,
           permissions: const AdminPermissions.none(),
           bootstrapped: markBootstrapped ? true : null,
         ),
@@ -154,9 +228,13 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
     final permsRes = await _repo.loadPermissions();
     final perms = permsRes.valueOrNull ?? const AdminPermissions.none();
 
+    // Muvaffaqiyat faqat TO'LIQ kirishda yoziladi: parol to'g'ri, lekin kod
+    // hali kiritilmagan sessiya "kirdi" emas.
     if (recordSuccess) {
       unawaited(_repo.recordLogin(success: true));
     }
+
+    _idle.start();
 
     emit(
       state.copyWith(
@@ -171,6 +249,7 @@ class AdminAuthCubit extends Cubit<AdminAuthState> {
 
   @override
   Future<void> close() {
+    _idle.stop();
     _authSub?.cancel();
     return super.close();
   }

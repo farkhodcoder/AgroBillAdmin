@@ -29,7 +29,7 @@ class AdminAiRepository {
         .from('ai_usage_limits')
         .select(
           'user_id, usage_date, questions_count, scans_count, '
-          'profiles(full_name, email)',
+          'profiles:staff_profiles(full_name, email)',
         )
         .gte('usage_date', _date(from))
         .order('usage_date', ascending: false)
@@ -55,7 +55,7 @@ class AdminAiRepository {
           'id, disease_name, disease_latin, confidence, severity, is_plant, '
           'model_version, latency_ms, created_at, image_path, symptoms, '
           'treatments, prevention, '
-          'profiles(full_name, email), crop_types(name_uz, name_ru, name_en)',
+          'profiles:staff_profiles(full_name, email), crop_types(name_uz, name_ru, name_en)',
         );
 
     if (severity != null) query = query.eq('severity', severity);
@@ -110,7 +110,7 @@ class AdminAiRepository {
         .from('ai_messages')
         .select(
           'id, conversation_id, content, created_at, '
-          'ai_conversations!inner(title, user_id, profiles(full_name, email))',
+          'ai_conversations!inner(title, user_id, profiles:staff_profiles(full_name, email))',
         )
         .eq('role', 'user');
 

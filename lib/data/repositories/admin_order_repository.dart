@@ -19,8 +19,8 @@ class AdminOrderRepository {
       'id, status, quantity, unit_price, total_price, delivery_method, '
       'cancelled_reason, created_at, respond_by, confirmed_at, completed_at, '
       'listings(title), '
-      'buyer:profiles!orders_buyer_id_fkey(full_name, email), '
-      'seller:profiles!orders_seller_id_fkey(full_name, email)';
+      'buyer:staff_profiles!orders_buyer_id_fkey(full_name, email), '
+      'seller:staff_profiles!orders_seller_id_fkey(full_name, email)';
 
   Future<Result<List<AdminOrderRow>>> list({
     required OrderFilter filter,

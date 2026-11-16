@@ -20,6 +20,39 @@
   -->
   <meta name="robots" content="noindex, nofollow">
 
+  <!--
+    CONTENT SECURITY POLICY.
+
+    Panel xodim tokeni bilan ishlaydi — sahifaga begona skript tushsa u shu
+    token nomidan bazaga murojaat qila oladi. Bu siyosat brauzerga faqat
+    quyidagilarga ruxsat beradi:
+
+      skript    o'zimiz + Flutter CanvasKit (gstatic). Ichki (inline)
+                skript TAQIQLANGAN — shuning uchun yuklanish skriptlari
+                boot.js da. 'wasm-unsafe-eval' CanvasKit WebAssembly uchun.
+      ulanish   o'zimiz, Supabase (https + realtime wss), gstatic
+                (CanvasKit .wasm va zaxira shriftlar).
+      rasm      o'zimiz, Supabase Storage (signed URL), data:/blob:.
+
+    Supabase loyihasi o'zgarsa bu yerdagi manzil ham o'zgarishi kerak
+    (lib/core/supabase/admin_config.dart bilan birga), aks holda panel
+    bazaga ulana olmaydi.
+
+    Eslatma: `frame-ancestors` <meta> orqali ishlamaydi (faqat HTTP
+    sarlavhada), GitHub Pages esa sarlavha qo'yishga yo'l bermaydi.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'wasm-unsafe-eval' https://www.gstatic.com;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' data: blob: https://qcpbholuttgmfojmpoct.supabase.co;
+    font-src 'self' data: https://fonts.gstatic.com;
+    connect-src 'self' https://qcpbholuttgmfojmpoct.supabase.co wss://qcpbholuttgmfojmpoct.supabase.co https://www.gstatic.com https://fonts.gstatic.com;
+    worker-src 'self' blob:;
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self'">
+
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="AgroBill Admin">
@@ -137,24 +170,8 @@
     html[data-theme="dark"] #boot .bar { background: #1F2C23; }
   </style>
 
-  <script>
-    // Bo'yashdan OLDIN ishlashi shart: ThemeController saqlagan tanlovni
-    // o'qib <html> ga qo'yadi. Usiz Flutter yuklanguncha yuklanish ekrani
-    // OS temasida turib, keyin tanlangan temaga sakrardi.
-    //
-    // Kalit theme_controller.dart dagi _storageKey bilan bir xil bo'lishi
-    // SHART — ikkalasi ayni bitta qiymatni o'qiydi.
-    (function () {
-      try {
-        var t = window.localStorage.getItem('agrobill.admin.theme');
-        if (t === 'light' || t === 'dark') {
-          document.documentElement.setAttribute('data-theme', t);
-        }
-      } catch (e) {
-        // Saqlash o'chirilgan brauzer — OS temasida qolamiz.
-      }
-    })();
-  </script>
+  <!-- Tema va yuklanish ekrani skriptlari — CSP sababli alohida faylda. -->
+  <script src="boot.js"></script>
 </head>
 <body>
   <div id="boot">
@@ -173,18 +190,6 @@
     <div class="name">AgroBill Admin</div>
     <div class="bar"><span></span></div>
   </div>
-
-  <script>
-    // Flutter birinchi kadrni chizganda yuklanish ekrani olib tashlanadi.
-    // `setTimeout` — o'tish animatsiyasi tugashini kutadi, aks holda
-    // element birdan yo'qolib, sakrash sezilardi.
-    window.addEventListener('flutter-first-frame', function () {
-      var boot = document.getElementById('boot');
-      if (!boot) return;
-      boot.classList.add('done');
-      setTimeout(function () { boot.remove(); }, 300);
-    });
-  </script>
 
   <script src="flutter_bootstrap.js" async></script>
 </body>

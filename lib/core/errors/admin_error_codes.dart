@@ -54,6 +54,9 @@ abstract final class AdminErrorCode {
   static const badCredentials = 'BAD_CREDENTIALS';
   static const notAdmin = 'NOT_ADMIN';
 
+  /// Parol to'g'ri, authenticator kodi xato.
+  static const mfaFailed = 'MFA_FAILED';
+
   static const invalidRole = 'INVALID_ROLE';
   static const invalidStatus = 'INVALID_STATUS';
   static const invalidValue = 'INVALID_VALUE';

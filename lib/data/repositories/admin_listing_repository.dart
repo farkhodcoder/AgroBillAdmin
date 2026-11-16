@@ -23,7 +23,7 @@ class AdminListingRepository {
       // listing_id + user_id) PostgREST uchun `listings <-> profiles`
       // ko'pdan-ko'pga bog'lanishi bo'lib qoldi. Oddiy `profiles(...)`
       // ikki ma'noli bo'lib, butun ro'yxat `PGRST201` bilan qulardi.
-      'profiles!listings_seller_id_fkey(id, full_name, email), '
+      'profiles:staff_profiles!listings_seller_id_fkey(id, full_name, email), '
       'regions(name_uz, name_ru, name_en), '
       'crop_types(name_uz, name_ru, name_en), '
       'listing_images(storage_path, sort_order)';

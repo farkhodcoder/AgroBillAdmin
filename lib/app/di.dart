@@ -8,6 +8,11 @@ import '../data/repositories/admin_auth_repository.dart';
 import '../data/repositories/admin_dashboard_repository.dart';
 import '../data/repositories/admin_farm_repository.dart';
 import '../data/repositories/admin_listing_repository.dart';
+import '../data/repositories/admin_dispute_repository.dart';
+import '../data/repositories/admin_moderation_repository.dart';
+import '../data/repositories/admin_request_repository.dart';
+import '../data/repositories/admin_news_repository.dart';
+import '../data/repositories/admin_verification_repository.dart';
 import '../data/repositories/admin_ops_repository.dart';
 import '../data/repositories/admin_order_repository.dart';
 import '../data/repositories/admin_staff_repository.dart';
@@ -37,7 +42,16 @@ Future<void> setupDependencies() async {
     ..registerLazySingleton<AdminUserRepository>(AdminUserRepository.new)
     ..registerLazySingleton<AdminFarmRepository>(AdminFarmRepository.new)
     ..registerLazySingleton<AdminListingRepository>(AdminListingRepository.new)
+    ..registerLazySingleton<AdminNewsRepository>(AdminNewsRepository.new)
+    ..registerLazySingleton<AdminVerificationRepository>(
+      AdminVerificationRepository.new,
+    )
     ..registerLazySingleton<AdminOrderRepository>(AdminOrderRepository.new)
+    ..registerLazySingleton<AdminDisputeRepository>(AdminDisputeRepository.new)
+    ..registerLazySingleton<AdminModerationRepository>(
+      AdminModerationRepository.new,
+    )
+    ..registerLazySingleton<AdminRequestRepository>(AdminRequestRepository.new)
     ..registerLazySingleton<AdminAiRepository>(AdminAiRepository.new)
     ..registerLazySingleton<AdminAuditRepository>(AdminAuditRepository.new)
     ..registerLazySingleton<AdminStaffRepository>(AdminStaffRepository.new)

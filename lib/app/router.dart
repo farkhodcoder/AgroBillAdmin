@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../data/repositories/admin_auth_repository.dart';
 import '../features/auth/cubit/admin_auth_cubit.dart';
 import '../features/auth/pages/login_page.dart';
+import '../features/auth/pages/mfa_enroll_page.dart';
+import '../features/auth/pages/mfa_verify_page.dart';
 import '../features/auth/pages/not_admin_page.dart';
 import '../features/ai/pages/ai_page.dart';
 import '../features/analytics/pages/analytics_page.dart';
@@ -14,15 +16,21 @@ import '../features/content/pages/content_page.dart';
 import '../features/dashboard/pages/dashboard_page.dart';
 import '../features/disease/pages/disease_page.dart';
 import '../features/farms/pages/farms_page.dart';
+import '../features/marketplace/pages/market_requests_page.dart';
 import '../features/marketplace/pages/marketplace_page.dart';
+import '../features/moderation/pages/chat_moderation_page.dart';
+import '../features/disputes/pages/disputes_page.dart';
+import '../features/news/pages/news_review_page.dart';
 import '../features/orders/pages/orders_page.dart';
 import '../features/shell/app_shell.dart';
 import '../features/settings/pages/settings_page.dart';
 import '../features/shell/pages/splash_page.dart';
 import '../features/staff/pages/staff_page.dart';
 import '../features/support/pages/support_page.dart';
+import '../features/users/pages/deletion_requests_page.dart';
 import '../features/users/pages/users_page.dart';
 import '../features/weather/pages/weather_page.dart';
+import '../features/verification/pages/verification_review_page.dart';
 import 'routes.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
@@ -37,6 +45,8 @@ final _shellKey = GlobalKey<NavigatorState>();
 /// Bosqichlar TTZ §8 dagi oqim bilan bir xil:
 ///   sessiya yo'q      -> /login
 ///   xodim emas        -> /no-access
+///   2FA ulanmagan     -> /mfa/setup   (faqat `admin.mfa_required` yoqilganda)
+///   2FA kodi kerak    -> /mfa
 ///   tayyor            -> /dashboard
 GoRouter createRouter(AdminAuthCubit authCubit) => GoRouter(
   navigatorKey: _rootKey,
@@ -58,6 +68,8 @@ GoRouter createRouter(AdminAuthCubit authCubit) => GoRouter(
     final target = switch (auth.stage) {
       AuthStage.signedOut => AdminRoutes.login,
       AuthStage.notAdmin => AdminRoutes.notAdmin,
+      AuthStage.mfaEnroll => AdminRoutes.mfaEnroll,
+      AuthStage.mfaVerify => AdminRoutes.mfaVerify,
       AuthStage.ready => null,
     };
 
@@ -88,6 +100,16 @@ GoRouter createRouter(AdminAuthCubit authCubit) => GoRouter(
       path: AdminRoutes.notAdmin,
       name: AdminRoutes.notAdminName,
       builder: (context, state) => const NotAdminPage(),
+    ),
+    GoRoute(
+      path: AdminRoutes.mfaEnroll,
+      name: AdminRoutes.mfaEnrollName,
+      builder: (context, state) => const MfaEnrollPage(),
+    ),
+    GoRoute(
+      path: AdminRoutes.mfaVerify,
+      name: AdminRoutes.mfaVerifyName,
+      builder: (context, state) => const MfaVerifyPage(),
     ),
 
     // --- Panel ichi ----------------------------------------------------------
@@ -157,6 +179,36 @@ GoRouter createRouter(AdminAuthCubit authCubit) => GoRouter(
           builder: (context, state) => const ContentPage(),
         ),
         GoRoute(
+          path: AdminRoutes.verification,
+          name: AdminRoutes.verificationName,
+          builder: (context, state) => const VerificationReviewPage(),
+        ),
+        GoRoute(
+          path: AdminRoutes.disputes,
+          name: AdminRoutes.disputesName,
+          builder: (context, state) => const DisputesPage(),
+        ),
+        GoRoute(
+          path: AdminRoutes.deletions,
+          name: AdminRoutes.deletionsName,
+          builder: (context, state) => const DeletionRequestsPage(),
+        ),
+        GoRoute(
+          path: AdminRoutes.requests,
+          name: AdminRoutes.requestsName,
+          builder: (context, state) => const MarketRequestsPage(),
+        ),
+        GoRoute(
+          path: AdminRoutes.moderation,
+          name: AdminRoutes.moderationName,
+          builder: (context, state) => const ChatModerationPage(),
+        ),
+        GoRoute(
+          path: AdminRoutes.news,
+          name: AdminRoutes.newsName,
+          builder: (context, state) => const NewsReviewPage(),
+        ),
+        GoRoute(
           path: AdminRoutes.weather,
           name: AdminRoutes.weatherName,
           builder: (context, state) => const WeatherPage(),
@@ -195,6 +247,13 @@ String _titleFor(String location) => switch (location) {
   AdminRoutes.staff => 'admin.nav.staff'.tr(),
   AdminRoutes.settings => 'admin.nav.settings'.tr(),
   AdminRoutes.content => 'admin.nav.content'.tr(),
+  AdminRoutes.news => 'admin.nav.news'.tr(),
+  AdminRoutes.verification => 'admin.nav.verification'.tr(),
+  AdminRoutes.disputes => 'admin.nav.disputes'.tr(),
+  AdminRoutes.deletions => 'admin.nav.deletions'.tr(),
+  AdminRoutes.requests => 'admin.nav.requests'.tr(),
+  AdminRoutes.moderation => 'admin.nav.moderation'.tr(),
+  AdminRoutes.support => 'admin.nav.support'.tr(),
   AdminRoutes.weather => 'admin.nav.weather'.tr(),
   AdminRoutes.analytics => 'admin.nav.analytics'.tr(),
   AdminRoutes.campaigns => 'admin.nav.notifications'.tr(),

@@ -23,7 +23,7 @@ class AdminUserRepository {
     int pageSize = AdminConfig.pageSize,
   }) => guard(() async {
     var query = Db.client
-        .from('profiles')
+        .from('staff_profiles')
         .select(
           'id, full_name, email, phone, role, activity, is_blocked, '
           'block_reason, rating, rating_count, created_at, deleted_at, '
@@ -68,7 +68,7 @@ class AdminUserRepository {
   Future<Result<AdminUserRow>> byId(String id, {String locale = 'uz'}) =>
       guard(() async {
         final row = await Db.client
-            .from('profiles')
+            .from('staff_profiles')
             .select(
               'id, full_name, email, phone, role, activity, is_blocked, '
               'block_reason, rating, rating_count, created_at, deleted_at, '

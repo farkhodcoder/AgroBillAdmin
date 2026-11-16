@@ -91,6 +91,7 @@ class AppSetting {
     this.description,
     this.updatedAt,
     this.updatedByName,
+    this.isSecret = false,
   });
 
   factory AppSetting.fromJson(Map<String, dynamic> json) {
@@ -105,6 +106,7 @@ class AppSetting {
           ? null
           : DateTime.parse(json['updated_at'] as String),
       updatedByName: by?['full_name'] as String?,
+      isSecret: json['is_secret'] == true,
     );
   }
 
@@ -113,6 +115,16 @@ class AppSetting {
   final String? description;
   final DateTime? updatedAt;
   final String? updatedByName;
+
+  /// `app_settings.is_secret` — maxfiy kalit (masalan, webhook siri).
+  /// Ekranda niqoblanadi: yelka ortidan qaragan odam yoki skrinshot uni
+  /// oshkor qilmasin.
+  final bool isSecret;
+
+  static const mask = '••••••••';
+
+  /// Ro'yxatda ko'rsatiladigan qiymat.
+  String get shown => isSecret ? mask : display;
 
   /// Ko'rsatish uchun — `"15"` emas, `15`.
   String get display => switch (value) {

@@ -18,7 +18,7 @@ class AdminSupportRepository {
   static const _ticketSelect =
       'id, user_id, category, subject, status, priority, assigned_to, '
       'resolution, resolved_at, created_at, updated_at, '
-      'user:profiles!support_tickets_user_id_fkey(full_name, email, phone), '
+      'user:staff_profiles!support_tickets_user_id_fkey(full_name, email, phone), '
       'assignee:profiles!support_tickets_assigned_to_fkey(full_name)';
 
   /// Murojaatlar navbati.

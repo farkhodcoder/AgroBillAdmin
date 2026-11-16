@@ -20,7 +20,7 @@ class AdminStaffRepository {
         .from('admin_users')
         .select(
           'id, role_code, is_active, language_code, last_login_at, '
-          'created_at, profiles!admin_users_id_fkey(full_name, email)',
+          'created_at, profiles:staff_profiles!admin_users_id_fkey(full_name, email)',
         )
         .order('created_at');
 
@@ -157,7 +157,9 @@ class AdminStaffRepository {
   Future<Result<List<AppSetting>>> settings() => guard(() async {
     final rows = await Db.client
         .from('app_settings')
-        .select('key, value, description, updated_at, profiles(full_name)')
+        .select(
+          'key, value, description, is_secret, updated_at, profiles(full_name)',
+        )
         .order('key');
 
     return [

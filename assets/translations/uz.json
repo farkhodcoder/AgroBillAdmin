@@ -90,7 +90,8 @@
       "sign_in": "Kirish",
       "sign_in_subtitle": "Xodim hisobingiz bilan kiring.",
       "sign_in_title": "Panelga kirish",
-      "sign_out": "Chiqish"
+      "sign_out": "Chiqish",
+      "idle_signed_out": "Uzoq vaqt harakat boʻlmagani uchun tizimdan chiqarildingiz. Qaytadan kiring."
     },
     "campaign_status": {
       "cancelled": "Bekor qilingan",
@@ -130,7 +131,11 @@
       "reason_optional": "Sabab (ixtiyoriy)",
       "reason_required": "Sabab (majburiy)",
       "retry": "Qayta urinish",
-      "search": "Qidirish"
+      "search": "Qidirish",
+      "save": "Saqlash",
+      "close": "Yopish",
+      "delete": "Oʻchirish",
+      "actions": "Amallar"
     },
     "content": {
       "archive": "Arxivlash",
@@ -247,7 +252,11 @@
       "timeout": "Server javob bermadi. Qaytadan urinib koʻring.",
       "too_many_requests": "Juda koʻp urinish. Biroz kutib turing.",
       "unknown": "Nomaʼlum xatolik.",
-      "weak_password": "Parol kamida 8 ta belgidan iborat boʻlishi kerak."
+      "weak_password": "Parol kamida 8 ta belgidan iborat boʻlishi kerak.",
+      "login_locked": "Juda koʻp xato urinish. 15 daqiqadan keyin qayta urinib koʻring.",
+      "mfa_invalid_code": "Kod notoʻgʻri yoki muddati oʻtgan. Ilovadagi yangi kodni kiriting.",
+      "mfa_required": "Bu amal uchun ikki bosqichli tasdiqlash kerak. Chiqib, qaytadan kiring.",
+      "same_password": "Yangi parol eskisidan farq qilishi kerak."
     },
     "farms": {
       "col_area": "Maydon",
@@ -330,6 +339,7 @@
       "farms": "Xoʻjaliklar",
       "knowledge": "Bilim bazasi",
       "marketplace": "Bozor",
+      "news": "AI yangiliklar",
       "notifications": "Bildirishnomalar",
       "orders": "Buyurtmalar",
       "outreach": "Tahlil va murojaat",
@@ -340,7 +350,26 @@
       "support": "Qoʻllab-quvvatlash",
       "system": "Tizim",
       "users": "Foydalanuvchilar",
-      "weather": "Ob-havo"
+      "weather": "Ob-havo",
+      "verification": "Profil tasdiqlash",
+      "disputes": "Nizolar",
+      "deletions": "Hisobni oʻchirish",
+      "requests": "Xaridor soʻrovlari",
+      "moderation": "Chat moderatsiyasi"
+    },
+    "news": {
+      "subtitle": "AI tayyorlagan agro-yangiliklar — tasdiqlash navbati",
+      "note": "Server kuniga 3 marta (08:00, 13:00, 19:00) yangilik tayyorlaydi. Har biri 30 daqiqa kutadi: tasdiqlasangiz darhol chiqadi, rad etsangiz chiqmaydi, hech kim qaramasa avtomatik eʼlon qilinadi. Foydalanuvchilarga push navbat boʻshagach bir marta ketadi.",
+      "empty": "Bu holatda yangilik yoʻq",
+      "auto_in": "{min} daqiqadan keyin avtomatik eʼlon",
+      "approve": "Tasdiqlash",
+      "reject": "Rad etish"
+    },
+    "news_status": {
+      "all": "Hammasi",
+      "pending": "Kutmoqda",
+      "published": "Eʼlon qilingan",
+      "rejected": "Rad etilgan"
     },
     "notification_type": {
       "critical": "Shoshilinch",
@@ -557,6 +586,205 @@
       "region": "Viloyat",
       "scope_note": "Admin faqat VILOYAT darajasidagi ogohlantirish yaratadi. Xoʻjalikka bogʻlangan ogohlantirishlarni mobil ilovaning oʻzi qoʻyadi va admin ularga tegmaydi.",
       "subtitle": "Viloyat darajasidagi ogohlantirishlar"
+    },
+    "verification_status": {
+      "all": "Hammasi",
+      "pending": "Kutmoqda",
+      "approved": "Tasdiqlangan",
+      "rejected": "Rad etilgan"
+    },
+    "verification": {
+      "subtitle": "Foydalanuvchilar yuborgan hujjatlar — “Tasdiqlangan” belgisi uchun",
+      "note": "Hujjatdagi ism profil ismiga mosligini va surat aniqligini tekshiring. Tasdiqlansa, bozorda foydalanuvchi ismi yonida belgi chiqadi. Rad etsangiz, sabab foydalanuvchiga push bilan boradi va u qayta yubora oladi.",
+      "empty": "Bu holatda ariza yoʻq",
+      "approve": "Tasdiqlash",
+      "reject": "Rad etish",
+      "revoke": "Belgini olib tashlash",
+      "approve_title": "Profilni tasdiqlash",
+      "approve_message": "{name} profiliga “Tasdiqlangan” belgisi beriladi. Izoh ixtiyoriy.",
+      "reject_title": "Arizani rad etish",
+      "reject_message": "Sababni foydalanuvchi koʻradi. Aniq yozing, masalan: “Surat xira, hujjat raqami koʻrinmayapti”.",
+      "revoke_title": "Belgini olib tashlash",
+      "revoke_message": "{name} profilidan “Tasdiqlangan” belgisi olib tashlanadi.",
+      "reject_reason": "Rad etish sababi: {reason}",
+      "joined": "{date} dan beri",
+      "no_docs": "Hujjat suratlarini ochib boʻlmadi — fayl oʻchirilgan yoki ruxsat yoʻq",
+      "zoom": "Kattalashtirish",
+      "role_farmer": "Fermer",
+      "role_buyer": "Xaridor",
+      "buyer_kind": {
+        "restaurant": "Restoran",
+        "shop": "Doʻkon",
+        "exporter": "Eksportchi",
+        "other": "Boshqa"
+      },
+      "doc": {
+        "passport": "Pasport / ID",
+        "farmer_certificate": "Fermer guvohnomasi",
+        "company_certificate": "Korxona guvohnomasi",
+        "other": "Boshqa hujjat"
+      }
+    },
+    "disputes": {
+      "subtitle": "Buyurtmalar boʻyicha xaridor va sotuvchi oʻrtasidagi nizolar",
+      "note": "Nizoni buyurtma tomonlaridan biri ilovada ochadi. Ikkala tomon bilan bogʻlanib, dalillarni koʻring va qaror yozing. Qaror matni ikkala tomonga bildirishnoma boʻlib boradi va auditga tushadi — aniq va xolis yozing.",
+      "empty": "Bu holatda nizo yoʻq",
+      "order": "Buyurtma #{id}",
+      "opened_by": "Nizoni ochgan",
+      "resolution": "Qaror",
+      "resolve": "Qaror chiqarish",
+      "resolve_title": "Nizo boʻyicha qaror",
+      "resolve_message": "Qaror matnini ikkala tomon ham koʻradi. Nima aniqlangani va nima qilinishi kerakligini yozing.",
+      "no_photos": "Suratlarni ochib boʻlmadi — fayl oʻchirilgan yoki ruxsat yoʻq",
+      "zoom": "Kattalashtirish"
+    },
+    "dispute_status": {
+      "all": "Hammasi",
+      "open": "Ochiq",
+      "resolved": "Hal qilingan",
+      "closed": "Yopilgan"
+    },
+    "dispute_reason": {
+      "not_received": "Mahsulot olinmadi",
+      "quality": "Sifat",
+      "quantity": "Miqdor",
+      "payment": "Toʻlov",
+      "behavior": "Muomala",
+      "other": "Boshqa"
+    },
+    "mfa": {
+      "enroll_title": "Ikki bosqichli himoyani ulash",
+      "enroll_subtitle": "Panelga kirish uchun paroldan tashqari telefoningizdagi kod ham kerak boʻladi.",
+      "verify_title": "Tasdiqlash kodi",
+      "verify_subtitle": "Authenticator ilovasidagi 6 xonali kodni kiriting.",
+      "step_scan": "Google Authenticator, Authy yoki shunga oʻxshash ilovani oching va QR kodni skanerlang. Keyin ilova koʻrsatgan 6 xonali kodni kiriting.",
+      "manual_key": "Skanerlab boʻlmasa, shu kalitni qoʻlda kiriting:",
+      "code": "6 xonali kod",
+      "code_required": "6 ta raqamdan iborat kodni kiriting.",
+      "enable": "Tasdiqlash va ulash",
+      "verify": "Tasdiqlash",
+      "enabled": "Ikki bosqichli himoya ulangan",
+      "setup": "Ikki bosqichli himoya"
+    },
+    "account": {
+      "change_password": "Parolni almashtirish",
+      "change_password_hint": "Avval joriy parolni kiriting. Yangi parol kamida 8 ta belgidan iborat boʻlsin.",
+      "change_password_hint_code": "Shaxsingizni authenticator ilovasidagi kod bilan tasdiqlang. Yangi parol kamida 8 ta belgidan iborat boʻlsin.",
+      "current_password": "Joriy parol",
+      "new_password": "Yangi parol",
+      "repeat_password": "Yangi parolni takrorlang",
+      "password_mismatch": "Parollar bir xil emas.",
+      "password_changed": "Parol almashtirildi."
+    },
+    "deletions": {
+      "subtitle": "Hisobini oʻchirishni soʻragan foydalanuvchilar",
+      "note": "Oʻchirish kechiktirib bajariladi: shu muddatda foydalanuvchi fikridan qaytishi mumkin. Bu yerda hech narsa oʻzgartirilmaydi — ochiq buyurtmasi borlar bilan oldindan bogʻlaning.",
+      "empty": "Soʻrov yoʻq",
+      "col_user": "Foydalanuvchi",
+      "col_contact": "Aloqa",
+      "col_requested": "Soʻralgan",
+      "col_scheduled": "Oʻchiriladi",
+      "col_status": "Holat",
+      "days_left": "{date} · {days} kun qoldi"
+    },
+    "deletion_status": {
+      "pending": "Kutilmoqda",
+      "completed": "Oʻchirildi",
+      "cancelled": "Bekor qilindi",
+      "all": "Hammasi"
+    },
+    "requests": {
+      "subtitle": "Xaridorlar nima izlayapti va fermerlar qanday taklif beryapti",
+      "empty": "Soʻrov yoʻq",
+      "target_price": "moʻljal: {price} soʻm",
+      "needed_by": "{date} gacha",
+      "offers": "Takliflar: {count}"
+    },
+    "request_status": {
+      "open": "Ochiq",
+      "fulfilled": "Bajarildi",
+      "expired": "Muddati oʻtdi",
+      "cancelled": "Bekor qilindi",
+      "all": "Hammasi"
+    },
+    "request_category": {
+      "grain": "Gʻalla",
+      "vegetable": "Sabzavot",
+      "fruit": "Meva",
+      "seed": "Urugʻ",
+      "fertilizer": "Oʻgʻit",
+      "equipment": "Texnika",
+      "industrial": "Texnik ekin",
+      "other": "Boshqa"
+    },
+    "unit": {
+      "kg": "kg",
+      "t": "t",
+      "dona": "dona"
+    },
+    "offer_status": {
+      "pending": "Kutilmoqda",
+      "accepted": "Qabul qilindi",
+      "declined": "Rad etildi",
+      "withdrawn": "Qaytarib olindi"
+    },
+    "report_status": {
+      "open": "Yangi",
+      "reviewed": "Koʻrib chiqildi",
+      "actioned": "Chora koʻrildi",
+      "dismissed": "Rad etildi",
+      "all": "Hammasi"
+    },
+    "conversation_kind": {
+      "community": "Hamjamiyat",
+      "direct": "Shaxsiy chat",
+      "market": "Bozor chati"
+    },
+    "moderation": {
+      "subtitle": "Shikoyatlar, avtomatik toʻsilgan xabarlar va yozish tezligi",
+      "tab_reports": "Shikoyatlar",
+      "tab_auto": "Avto-moderatsiya",
+      "tab_limits": "Tezlik cheklovlari",
+      "reports_empty": "Shikoyat yoʻq",
+      "report_count": "{count} ta shikoyat",
+      "message_deleted": "Xabar oʻchirilgan",
+      "reported_by": "{name} shikoyat qildi: «{reason}»",
+      "no_text": "(matnsiz)",
+      "has_attachment": "Rasm biriktirilgan",
+      "read": "Suhbatni oʻqish",
+      "read_title": "Suhbatni oʻqish",
+      "read_message": "Shaxsiy yozishma maxfiy. Nega oʻqishingiz kerakligini yozing — sabab auditga tushadi.",
+      "read_audited": "Bu oʻqish auditga yozildi",
+      "no_messages": "Xabar yoʻq",
+      "participant": "Ishtirokchi",
+      "reopen": "Qayta ochish",
+      "status_message": "Izoh ixtiyoriy — u auditga yoziladi.",
+      "auto_note": "AI yoki taqiqlangan soʻzlar roʻyxati toʻsib qoʻygan xabarlar. Xabar foydalanuvchiga yetkazilmagan.",
+      "auto_empty": "Toʻsilgan xabar yoʻq",
+      "col_time": "Vaqt",
+      "col_sender": "Yuboruvchi",
+      "col_category": "Turi",
+      "col_content": "Matn",
+      "limits_note": "Alohida foydalanuvchi yoki kanal uchun yozish tezligi. 0 — cheklovsiz, boʻsh — umumiy qoida.",
+      "limits_empty": "Alohida cheklov yoʻq",
+      "add_limit": "Cheklov qoʻshish",
+      "add_limit_hint": "Foydalanuvchi, kanal yoki ikkalasini tanlang.",
+      "col_target": "Kimga",
+      "col_slow": "Xabarlar orasida",
+      "col_image": "Rasmlar orasida",
+      "col_note": "Izoh",
+      "all_chats": "Barcha suhbatlar",
+      "no_limit": "Cheklovsiz",
+      "seconds": "{n} s",
+      "seconds_hint": "soniya, 0–86400",
+      "user": "Foydalanuvchi",
+      "user_hint": "Ism, email yoki telefon",
+      "channel": "Kanal",
+      "delete_limit_title": "Cheklovni oʻchirish",
+      "delete_limit_message": "Foydalanuvchiga yana umumiy qoida qoʻllanadi.",
+      "err_target": "Foydalanuvchi yoki kanalni tanlang.",
+      "err_seconds": "Soniya 0 dan 86400 gacha boʻlishi kerak.",
+      "err_empty": "Kamida bitta cheklovni kiriting."
     }
   }
 }

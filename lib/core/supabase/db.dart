@@ -72,6 +72,20 @@ const kSupabaseTimeout = Duration(seconds: 20);
 /// har bir xato tarjima kalitiga bog'lanadi.
 AppFailure mapSupabaseError(Object error) {
   if (error is AuthException) {
+    // Avval Supabase'ning aniq kodlari — xabar matni versiyadan versiyaga
+    // o'zgaradi, kod esa barqaror.
+    final known = switch (error.code) {
+      'mfa_verification_failed' ||
+      'mfa_challenge_expired' => 'admin.errors.mfa_invalid_code',
+      'same_password' => 'admin.errors.same_password',
+      'weak_password' => 'admin.errors.weak_password',
+      'insufficient_aal' => 'admin.errors.mfa_required',
+      _ => null,
+    };
+    if (known != null) {
+      return AppFailure(FailureKind.auth, known, detail: error.message);
+    }
+
     final message = error.message.toLowerCase();
     if (message.contains('invalid login') ||
         message.contains('invalid credentials')) {

@@ -548,15 +548,27 @@ class _Avatar extends StatelessWidget {
 ///
 /// O'xshash belgilar (`0/O`, `1/l/I`) ataylab olib tashlangan: parol odatda
 /// og'zaki yoki xabarda uzatiladi.
-String _generatePassword([int length = 14]) {
-  const alphabet =
-      'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#%*?';
+///
+/// Har to'rt turdan (katta, kichik harf, raqam, belgi) KAMIDA BITTA bo'ladi:
+/// Supabase Auth parol siyosati yoqilgan bo'lsa, tasodifan raqamsiz chiqqan
+/// parol xodim yaratishni `WEAK_PASSWORD` bilan yiqitardi.
+String generateStaffPassword([int length = 14]) {
+  const groups = [
+    'ABCDEFGHJKLMNPQRSTUVWXYZ',
+    'abcdefghijkmnpqrstuvwxyz',
+    '23456789',
+    '!@#%*?',
+  ];
+  final all = groups.join();
   final rnd = Random.secure();
-  return List.generate(
-    length,
-    (_) => alphabet[rnd.nextInt(alphabet.length)],
-  ).join();
+  final chars = [
+    for (final g in groups) g[rnd.nextInt(g.length)],
+    for (var i = groups.length; i < length; i++) all[rnd.nextInt(all.length)],
+  ]..shuffle(rnd);
+  return chars.join();
 }
+
+String _generatePassword() => generateStaffPassword();
 
 final _emailRe = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 

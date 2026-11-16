@@ -17,6 +17,14 @@ abstract final class AdminRoutes {
   static const notAdmin = '/no-access';
   static const notAdminName = 'not-admin';
 
+  /// 2FA majburiy, lekin hali ulanmagan.
+  static const mfaEnroll = '/mfa/setup';
+  static const mfaEnrollName = 'mfa-enroll';
+
+  /// 2FA ulangan — kirishdagi kod bosqichi.
+  static const mfaVerify = '/mfa';
+  static const mfaVerifyName = 'mfa-verify';
+
   // --- Panel ichi ------------------------------------------------------------
 
   static const dashboard = '/dashboard';
@@ -52,6 +60,24 @@ abstract final class AdminRoutes {
   static const content = '/content';
   static const contentName = 'content';
 
+  static const news = '/news';
+  static const newsName = 'news';
+
+  static const verification = '/verification';
+  static const verificationName = 'verification';
+
+  static const disputes = '/disputes';
+  static const disputesName = 'disputes';
+
+  static const deletions = '/deletions';
+  static const deletionsName = 'deletions';
+
+  static const requests = '/requests';
+  static const requestsName = 'requests';
+
+  static const moderation = '/moderation';
+  static const moderationName = 'moderation';
+
   static const weather = '/weather';
   static const weatherName = 'weather';
 
@@ -66,5 +92,5 @@ abstract final class AdminRoutes {
 
   /// Kirish oqimiga tegishli barcha yo'llar — router `redirect` shu ro'yxatga
   /// qaraydi.
-  static const authFlow = <String>[login, notAdmin];
+  static const authFlow = <String>[login, notAdmin, mfaEnroll, mfaVerify];
 }

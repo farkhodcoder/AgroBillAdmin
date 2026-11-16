@@ -194,7 +194,7 @@ class _SettingTile extends StatelessWidget {
               borderRadius: AgRadius.rSm,
             ),
             child: Text(
-              setting.display,
+              setting.shown,
               style: AppTypography.bodySmall.copyWith(
                 color: colors.text,
                 fontFamily: 'monospace',
@@ -233,7 +233,10 @@ class _EditDialog extends StatefulWidget {
 }
 
 class _EditDialogState extends State<_EditDialog> {
-  late final _value = TextEditingController(text: widget.setting.display);
+  // Maxfiy qiymat maydonga ham chiqarilmaydi — yangisi noldan yoziladi.
+  late final _value = TextEditingController(
+    text: widget.setting.isSecret ? '' : widget.setting.display,
+  );
   final _reason = TextEditingController();
   String? _valueError;
   String? _reasonError;

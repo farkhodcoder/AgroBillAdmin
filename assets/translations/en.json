@@ -90,7 +90,8 @@
       "sign_in": "Sign in",
       "sign_in_subtitle": "Use your staff account.",
       "sign_in_title": "Sign in",
-      "sign_out": "Sign out"
+      "sign_out": "Sign out",
+      "idle_signed_out": "You were signed out after a long period of inactivity. Sign in again."
     },
     "campaign_status": {
       "cancelled": "Cancelled",
@@ -130,7 +131,11 @@
       "reason_optional": "Reason (optional)",
       "reason_required": "Reason (required)",
       "retry": "Retry",
-      "search": "Search"
+      "search": "Search",
+      "save": "Save",
+      "close": "Close",
+      "delete": "Delete",
+      "actions": "Actions"
     },
     "content": {
       "archive": "Archive",
@@ -247,7 +252,11 @@
       "timeout": "The server did not respond. Please try again.",
       "too_many_requests": "Too many attempts. Please wait a moment.",
       "unknown": "Unknown error.",
-      "weak_password": "Password must be at least 8 characters."
+      "weak_password": "Password must be at least 8 characters.",
+      "login_locked": "Too many failed attempts. Try again in 15 minutes.",
+      "mfa_invalid_code": "The code is wrong or has expired. Enter a fresh code from the app.",
+      "mfa_required": "This action needs two-step verification. Sign out and sign in again.",
+      "same_password": "The new password must differ from the old one."
     },
     "farms": {
       "col_area": "Area",
@@ -330,6 +339,7 @@
       "farms": "Farms",
       "knowledge": "Knowledge base",
       "marketplace": "Marketplace",
+      "news": "AI news",
       "notifications": "Notifications",
       "orders": "Orders",
       "outreach": "Analytics and outreach",
@@ -340,7 +350,26 @@
       "support": "Support",
       "system": "System",
       "users": "Users",
-      "weather": "Weather"
+      "weather": "Weather",
+      "verification": "Profile verification",
+      "disputes": "Disputes",
+      "deletions": "Account deletion",
+      "requests": "Buyer requests",
+      "moderation": "Chat moderation"
+    },
+    "news": {
+      "subtitle": "Farming news prepared by AI — review queue",
+      "note": "The server prepares news 3 times a day (08:00, 13:00, 19:00). Each item waits 30 minutes: approved goes out at once, rejected never does, and with no decision it is published automatically. Users get one push once the queue is empty.",
+      "empty": "No news with this status",
+      "auto_in": "Auto-publish in {min} min",
+      "approve": "Approve",
+      "reject": "Reject"
+    },
+    "news_status": {
+      "all": "All",
+      "pending": "Pending",
+      "published": "Published",
+      "rejected": "Rejected"
     },
     "notification_type": {
       "critical": "Critical",
@@ -557,6 +586,205 @@
       "region": "Region",
       "scope_note": "Admins create REGION-level alerts only. Farm-level alerts come from the mobile app itself and admins leave them alone.",
       "subtitle": "Region-level alerts"
+    },
+    "verification_status": {
+      "all": "All",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "verification": {
+      "subtitle": "Documents submitted by users for the “Verified” badge",
+      "note": "Check that the name on the document matches the profile and the photo is clear. Once approved, a badge appears next to the user’s name in the market. If you reject, the reason is sent to the user as a push notification and they can apply again.",
+      "empty": "No requests with this status",
+      "approve": "Approve",
+      "reject": "Reject",
+      "revoke": "Remove badge",
+      "approve_title": "Approve profile",
+      "approve_message": "{name} will get the “Verified” badge. A note is optional.",
+      "reject_title": "Reject request",
+      "reject_message": "The user will see the reason. Be specific, e.g. “Photo is blurry, document number is not visible”.",
+      "revoke_title": "Remove badge",
+      "revoke_message": "The “Verified” badge will be removed from {name}.",
+      "reject_reason": "Rejection reason: {reason}",
+      "joined": "since {date}",
+      "no_docs": "Could not open the document photos — file deleted or no access",
+      "zoom": "Zoom in",
+      "role_farmer": "Farmer",
+      "role_buyer": "Buyer",
+      "buyer_kind": {
+        "restaurant": "Restaurant",
+        "shop": "Shop",
+        "exporter": "Exporter",
+        "other": "Other"
+      },
+      "doc": {
+        "passport": "Passport / ID",
+        "farmer_certificate": "Farm certificate",
+        "company_certificate": "Company certificate",
+        "other": "Other document"
+      }
+    },
+    "disputes": {
+      "subtitle": "Disputes between buyers and sellers over orders",
+      "note": "A dispute is opened in the app by one of the order parties. Contact both sides, review the evidence and write a resolution. The resolution text is sent to both parties as a notification and recorded in the audit log — keep it precise and neutral.",
+      "empty": "No disputes in this status",
+      "order": "Order #{id}",
+      "opened_by": "Opened by",
+      "resolution": "Resolution",
+      "resolve": "Resolve",
+      "resolve_title": "Dispute resolution",
+      "resolve_message": "Both parties will see the resolution text. State what was established and what must be done.",
+      "no_photos": "Could not open the photos — file deleted or access denied",
+      "zoom": "Zoom"
+    },
+    "dispute_status": {
+      "all": "All",
+      "open": "Open",
+      "resolved": "Resolved",
+      "closed": "Closed"
+    },
+    "dispute_reason": {
+      "not_received": "Not received",
+      "quality": "Quality",
+      "quantity": "Quantity",
+      "payment": "Payment",
+      "behavior": "Conduct",
+      "other": "Other"
+    },
+    "mfa": {
+      "enroll_title": "Set up two-step protection",
+      "enroll_subtitle": "Besides your password, signing in will require a code from your phone.",
+      "verify_title": "Verification code",
+      "verify_subtitle": "Enter the 6-digit code from your authenticator app.",
+      "step_scan": "Open Google Authenticator, Authy or a similar app and scan the QR code. Then enter the 6-digit code the app shows.",
+      "manual_key": "If you cannot scan it, enter this key manually:",
+      "code": "6-digit code",
+      "code_required": "Enter the 6-digit code.",
+      "enable": "Verify and enable",
+      "verify": "Verify",
+      "enabled": "Two-step protection is on",
+      "setup": "Two-step protection"
+    },
+    "account": {
+      "change_password": "Change password",
+      "change_password_hint": "Enter your current password first. The new password must be at least 8 characters.",
+      "change_password_hint_code": "Confirm it is you with a code from your authenticator app. The new password must be at least 8 characters.",
+      "current_password": "Current password",
+      "new_password": "New password",
+      "repeat_password": "Repeat the new password",
+      "password_mismatch": "The passwords do not match.",
+      "password_changed": "Password changed."
+    },
+    "deletions": {
+      "subtitle": "Users who asked to delete their account",
+      "note": "Deletion is delayed so the user can change their mind. Nothing is changed here — contact users with open orders in advance.",
+      "empty": "No requests",
+      "col_user": "User",
+      "col_contact": "Contact",
+      "col_requested": "Requested",
+      "col_scheduled": "Deleted on",
+      "col_status": "Status",
+      "days_left": "{date} · {days} days left"
+    },
+    "deletion_status": {
+      "pending": "Pending",
+      "completed": "Deleted",
+      "cancelled": "Cancelled",
+      "all": "All"
+    },
+    "requests": {
+      "subtitle": "What buyers are looking for and what farmers offer",
+      "empty": "No requests",
+      "target_price": "target: {price} UZS",
+      "needed_by": "by {date}",
+      "offers": "Offers: {count}"
+    },
+    "request_status": {
+      "open": "Open",
+      "fulfilled": "Fulfilled",
+      "expired": "Expired",
+      "cancelled": "Cancelled",
+      "all": "All"
+    },
+    "request_category": {
+      "grain": "Grain",
+      "vegetable": "Vegetables",
+      "fruit": "Fruit",
+      "seed": "Seeds",
+      "fertilizer": "Fertilizer",
+      "equipment": "Equipment",
+      "industrial": "Industrial crops",
+      "other": "Other"
+    },
+    "unit": {
+      "kg": "kg",
+      "t": "t",
+      "dona": "pcs"
+    },
+    "offer_status": {
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "declined": "Declined",
+      "withdrawn": "Withdrawn"
+    },
+    "report_status": {
+      "open": "New",
+      "reviewed": "Reviewed",
+      "actioned": "Action taken",
+      "dismissed": "Dismissed",
+      "all": "All"
+    },
+    "conversation_kind": {
+      "community": "Community",
+      "direct": "Direct chat",
+      "market": "Deal chat"
+    },
+    "moderation": {
+      "subtitle": "Reports, auto-blocked messages and posting rate",
+      "tab_reports": "Reports",
+      "tab_auto": "Auto-moderation",
+      "tab_limits": "Rate limits",
+      "reports_empty": "No reports",
+      "report_count": "{count} reports",
+      "message_deleted": "Message deleted",
+      "reported_by": "{name} reported: “{reason}”",
+      "no_text": "(no text)",
+      "has_attachment": "Image attached",
+      "read": "Read conversation",
+      "read_title": "Read conversation",
+      "read_message": "Private messages are confidential. Explain why you need to read them — the reason is written to the audit log.",
+      "read_audited": "This access was written to the audit log",
+      "no_messages": "No messages",
+      "participant": "Participant",
+      "reopen": "Reopen",
+      "status_message": "The note is optional and goes to the audit log.",
+      "auto_note": "Messages blocked by AI or the banned-word list. They were never delivered.",
+      "auto_empty": "No blocked messages",
+      "col_time": "Time",
+      "col_sender": "Sender",
+      "col_category": "Type",
+      "col_content": "Text",
+      "limits_note": "Posting rate for a specific user or channel. 0 means no limit; empty means the global rule.",
+      "limits_empty": "No custom limits",
+      "add_limit": "Add limit",
+      "add_limit_hint": "Pick a user, a channel, or both.",
+      "col_target": "Applies to",
+      "col_slow": "Between messages",
+      "col_image": "Between images",
+      "col_note": "Note",
+      "all_chats": "All chats",
+      "no_limit": "No limit",
+      "seconds": "{n} s",
+      "seconds_hint": "seconds, 0–86400",
+      "user": "User",
+      "user_hint": "Name, email or phone",
+      "channel": "Channel",
+      "delete_limit_title": "Delete limit",
+      "delete_limit_message": "The global rule will apply to this user again.",
+      "err_target": "Pick a user or a channel.",
+      "err_seconds": "Seconds must be between 0 and 86400.",
+      "err_empty": "Enter at least one limit."
     }
   }
 }

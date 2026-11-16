@@ -19,7 +19,7 @@ class AdminFarmRepository {
         .from('farms')
         .select(
           'id, name, area_hectares, irrigation, created_at, '
-          'profiles(id, full_name, email), '
+          'profiles:staff_profiles(id, full_name, email), '
           'regions(name_uz, name_ru, name_en), '
           'districts(name_uz, name_ru, name_en), '
           'fields(count)',

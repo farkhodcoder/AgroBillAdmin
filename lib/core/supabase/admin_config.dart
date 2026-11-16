@@ -52,6 +52,12 @@ abstract final class AdminConfig {
   static const bucketScanImages = 'scan-images';
   static const bucketListingImages = 'listing-images';
 
+  /// Tasdiqlash hujjatlari — `users.read` bilan ochiladi (mobil 0051).
+  static const bucketVerificationDocs = 'verification-docs';
+
+  /// Nizo dalillari — `orders.read` bilan ochiladi (mobil 0058).
+  static const bucketOrderDisputes = 'order-disputes';
+
   /// Signed URL amal qilish muddati.
   static const signedUrlTtl = Duration(hours: 1);
 

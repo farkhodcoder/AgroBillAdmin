@@ -90,7 +90,8 @@
       "sign_in": "Giriş yap",
       "sign_in_subtitle": "Personel hesabınızı kullanın.",
       "sign_in_title": "Giriş yap",
-      "sign_out": "Çıkış yap"
+      "sign_out": "Çıkış yap",
+      "idle_signed_out": "Uzun süre işlem yapılmadığı için oturumunuz kapatıldı. Yeniden giriş yapın."
     },
     "campaign_status": {
       "cancelled": "İptal edildi",
@@ -130,7 +131,11 @@
       "reason_optional": "Gerekçe (isteğe bağlı)",
       "reason_required": "Gerekçe (zorunlu)",
       "retry": "Yeniden dene",
-      "search": "Ara"
+      "search": "Ara",
+      "save": "Kaydet",
+      "close": "Kapat",
+      "delete": "Sil",
+      "actions": "İşlemler"
     },
     "content": {
       "archive": "Arşivle",
@@ -247,7 +252,11 @@
       "timeout": "Sunucu yanıt vermedi. Lütfen yeniden deneyin.",
       "too_many_requests": "Çok fazla deneme. Lütfen biraz bekleyin.",
       "unknown": "Bilinmeyen hata.",
-      "weak_password": "Şifre en az 8 karakter olmalıdır."
+      "weak_password": "Şifre en az 8 karakter olmalıdır.",
+      "login_locked": "Çok fazla hatalı deneme. 15 dakika sonra tekrar deneyin.",
+      "mfa_invalid_code": "Kod hatalı veya süresi dolmuş. Uygulamadaki yeni kodu girin.",
+      "mfa_required": "Bu işlem için iki adımlı doğrulama gerekir. Çıkış yapıp yeniden giriş yapın.",
+      "same_password": "Yeni şifre eskisinden farklı olmalıdır."
     },
     "farms": {
       "col_area": "Alan",
@@ -330,6 +339,7 @@
       "farms": "Çiftlikler",
       "knowledge": "Bilgi bankası",
       "marketplace": "Pazar",
+      "news": "AI haberleri",
       "notifications": "Bildirimler",
       "orders": "Siparişler",
       "outreach": "Analiz ve iletişim",
@@ -340,7 +350,26 @@
       "support": "Destek",
       "system": "Sistem",
       "users": "Kullanıcılar",
-      "weather": "Hava durumu"
+      "weather": "Hava durumu",
+      "verification": "Profil doğrulama",
+      "disputes": "Anlaşmazlıklar",
+      "deletions": "Hesap silme",
+      "requests": "Alıcı talepleri",
+      "moderation": "Sohbet moderasyonu"
+    },
+    "news": {
+      "subtitle": "AI'nin hazırladığı tarım haberleri — onay kuyruğu",
+      "note": "Sunucu günde 3 kez (08:00, 13:00, 19:00) haber hazırlar. Her biri 30 dakika bekler: onaylanan hemen yayınlanır, reddedilen yayınlanmaz, karar verilmezse otomatik yayınlanır. Kullanıcılara kuyruk boşalınca tek bir push gider.",
+      "empty": "Bu durumda haber yok",
+      "auto_in": "{min} dk sonra otomatik yayın",
+      "approve": "Onayla",
+      "reject": "Reddet"
+    },
+    "news_status": {
+      "all": "Tümü",
+      "pending": "Bekliyor",
+      "published": "Yayınlandı",
+      "rejected": "Reddedildi"
     },
     "notification_type": {
       "critical": "Kritik",
@@ -557,6 +586,205 @@
       "region": "Bölge",
       "scope_note": "Yöneticiler yalnızca BÖLGE düzeyinde uyarı oluşturur. Çiftlik düzeyindeki uyarılar mobil uygulamanın kendisinden gelir ve yöneticiler onlara dokunmaz.",
       "subtitle": "Bölge düzeyinde uyarılar"
+    },
+    "verification_status": {
+      "all": "Tümü",
+      "pending": "Bekliyor",
+      "approved": "Onaylandı",
+      "rejected": "Reddedildi"
+    },
+    "verification": {
+      "subtitle": "“Doğrulanmış” rozeti için kullanıcıların gönderdiği belgeler",
+      "note": "Belgedeki adın profildeki adla eşleştiğini ve fotoğrafın net olduğunu kontrol edin. Onaylanırsa pazarda kullanıcının adının yanında rozet görünür. Reddederseniz sebep kullanıcıya bildirim olarak gider ve yeniden başvurabilir.",
+      "empty": "Bu durumda başvuru yok",
+      "approve": "Onayla",
+      "reject": "Reddet",
+      "revoke": "Rozeti kaldır",
+      "approve_title": "Profili onayla",
+      "approve_message": "{name} “Doğrulanmış” rozeti alacak. Not isteğe bağlıdır.",
+      "reject_title": "Başvuruyu reddet",
+      "reject_message": "Sebebi kullanıcı görecek. Net yazın, örneğin: “Fotoğraf bulanık, belge numarası görünmüyor”.",
+      "revoke_title": "Rozeti kaldır",
+      "revoke_message": "{name} profilinden “Doğrulanmış” rozeti kaldırılacak.",
+      "reject_reason": "Ret sebebi: {reason}",
+      "joined": "{date} tarihinden beri",
+      "no_docs": "Belge fotoğrafları açılamadı — dosya silinmiş veya erişim yok",
+      "zoom": "Büyüt",
+      "role_farmer": "Çiftçi",
+      "role_buyer": "Alıcı",
+      "buyer_kind": {
+        "restaurant": "Restoran",
+        "shop": "Mağaza",
+        "exporter": "İhracatçı",
+        "other": "Diğer"
+      },
+      "doc": {
+        "passport": "Pasaport / Kimlik",
+        "farmer_certificate": "Çiftlik belgesi",
+        "company_certificate": "Şirket belgesi",
+        "other": "Diğer belge"
+      }
+    },
+    "disputes": {
+      "subtitle": "Siparişlerde alıcı ile satıcı arasındaki anlaşmazlıklar",
+      "note": "Anlaşmazlığı sipariş taraflarından biri uygulamada açar. İki tarafla da iletişime geçin, kanıtları inceleyin ve kararı yazın. Karar metni iki tarafa da bildirim olarak gider ve denetim kaydına işlenir — açık ve tarafsız yazın.",
+      "empty": "Bu durumda anlaşmazlık yok",
+      "order": "Sipariş #{id}",
+      "opened_by": "Açan taraf",
+      "resolution": "Karar",
+      "resolve": "Karar ver",
+      "resolve_title": "Anlaşmazlık kararı",
+      "resolve_message": "Karar metnini iki taraf da görür. Neyin tespit edildiğini ve ne yapılması gerektiğini yazın.",
+      "no_photos": "Fotoğraflar açılamadı — dosya silinmiş veya erişim yok",
+      "zoom": "Büyüt"
+    },
+    "dispute_status": {
+      "all": "Tümü",
+      "open": "Açık",
+      "resolved": "Çözüldü",
+      "closed": "Kapatıldı"
+    },
+    "dispute_reason": {
+      "not_received": "Ürün teslim alınmadı",
+      "quality": "Kalite",
+      "quantity": "Miktar",
+      "payment": "Ödeme",
+      "behavior": "Davranış",
+      "other": "Diğer"
+    },
+    "mfa": {
+      "enroll_title": "İki adımlı korumayı etkinleştir",
+      "enroll_subtitle": "Panele girişte şifrenin yanında telefonunuzdaki kod da gerekecek.",
+      "verify_title": "Doğrulama kodu",
+      "verify_subtitle": "Kimlik doğrulama uygulamasındaki 6 haneli kodu girin.",
+      "step_scan": "Google Authenticator, Authy veya benzeri bir uygulamayı açın ve QR kodu tarayın. Ardından uygulamanın gösterdiği 6 haneli kodu girin.",
+      "manual_key": "Tarayamıyorsanız bu anahtarı elle girin:",
+      "code": "6 haneli kod",
+      "code_required": "6 rakamdan oluşan kodu girin.",
+      "enable": "Doğrula ve etkinleştir",
+      "verify": "Doğrula",
+      "enabled": "İki adımlı koruma etkin",
+      "setup": "İki adımlı koruma"
+    },
+    "account": {
+      "change_password": "Şifreyi değiştir",
+      "change_password_hint": "Önce mevcut şifrenizi girin. Yeni şifre en az 8 karakter olmalıdır.",
+      "change_password_hint_code": "Kimliğinizi doğrulama uygulamasındaki kodla onaylayın. Yeni şifre en az 8 karakter olmalıdır.",
+      "current_password": "Mevcut şifre",
+      "new_password": "Yeni şifre",
+      "repeat_password": "Yeni şifreyi tekrarlayın",
+      "password_mismatch": "Şifreler eşleşmiyor.",
+      "password_changed": "Şifre değiştirildi."
+    },
+    "deletions": {
+      "subtitle": "Hesabını silmek isteyen kullanıcılar",
+      "note": "Silme gecikmeli yapılır; kullanıcı bu sürede vazgeçebilir. Burada hiçbir şey değiştirilmez — açık siparişi olanlarla önceden iletişime geçin.",
+      "empty": "Talep yok",
+      "col_user": "Kullanıcı",
+      "col_contact": "İletişim",
+      "col_requested": "Talep tarihi",
+      "col_scheduled": "Silinecek",
+      "col_status": "Durum",
+      "days_left": "{date} · {days} gün kaldı"
+    },
+    "deletion_status": {
+      "pending": "Bekliyor",
+      "completed": "Silindi",
+      "cancelled": "İptal edildi",
+      "all": "Tümü"
+    },
+    "requests": {
+      "subtitle": "Alıcılar ne arıyor, çiftçiler ne teklif ediyor",
+      "empty": "Talep yok",
+      "target_price": "hedef: {price} UZS",
+      "needed_by": "{date} tarihine kadar",
+      "offers": "Teklifler: {count}"
+    },
+    "request_status": {
+      "open": "Açık",
+      "fulfilled": "Karşılandı",
+      "expired": "Süresi doldu",
+      "cancelled": "İptal edildi",
+      "all": "Tümü"
+    },
+    "request_category": {
+      "grain": "Tahıl",
+      "vegetable": "Sebze",
+      "fruit": "Meyve",
+      "seed": "Tohum",
+      "fertilizer": "Gübre",
+      "equipment": "Ekipman",
+      "industrial": "Endüstriyel ürün",
+      "other": "Diğer"
+    },
+    "unit": {
+      "kg": "kg",
+      "t": "t",
+      "dona": "adet"
+    },
+    "offer_status": {
+      "pending": "Bekliyor",
+      "accepted": "Kabul edildi",
+      "declined": "Reddedildi",
+      "withdrawn": "Geri çekildi"
+    },
+    "report_status": {
+      "open": "Yeni",
+      "reviewed": "İncelendi",
+      "actioned": "İşlem yapıldı",
+      "dismissed": "Reddedildi",
+      "all": "Tümü"
+    },
+    "conversation_kind": {
+      "community": "Topluluk",
+      "direct": "Özel sohbet",
+      "market": "Satış sohbeti"
+    },
+    "moderation": {
+      "subtitle": "Şikayetler, otomatik engellenen mesajlar ve gönderim hızı",
+      "tab_reports": "Şikayetler",
+      "tab_auto": "Otomatik moderasyon",
+      "tab_limits": "Hız sınırları",
+      "reports_empty": "Şikayet yok",
+      "report_count": "{count} şikayet",
+      "message_deleted": "Mesaj silinmiş",
+      "reported_by": "{name} şikayet etti: “{reason}”",
+      "no_text": "(metin yok)",
+      "has_attachment": "Görsel ekli",
+      "read": "Sohbeti oku",
+      "read_title": "Sohbeti oku",
+      "read_message": "Özel yazışmalar gizlidir. Neden okumanız gerektiğini yazın — gerekçe denetim kaydına yazılır.",
+      "read_audited": "Bu erişim denetim kaydına yazıldı",
+      "no_messages": "Mesaj yok",
+      "participant": "Katılımcı",
+      "reopen": "Yeniden aç",
+      "status_message": "Not isteğe bağlıdır ve denetim kaydına yazılır.",
+      "auto_note": "AI veya yasaklı kelime listesi tarafından engellenen mesajlar. Alıcıya hiç ulaşmadı.",
+      "auto_empty": "Engellenen mesaj yok",
+      "col_time": "Zaman",
+      "col_sender": "Gönderen",
+      "col_category": "Tür",
+      "col_content": "Metin",
+      "limits_note": "Belirli bir kullanıcı veya kanal için gönderim hızı. 0 sınırsız, boş genel kural demektir.",
+      "limits_empty": "Özel sınır yok",
+      "add_limit": "Sınır ekle",
+      "add_limit_hint": "Bir kullanıcı, kanal veya ikisini seçin.",
+      "col_target": "Kime",
+      "col_slow": "Mesajlar arası",
+      "col_image": "Görseller arası",
+      "col_note": "Not",
+      "all_chats": "Tüm sohbetler",
+      "no_limit": "Sınırsız",
+      "seconds": "{n} sn",
+      "seconds_hint": "saniye, 0–86400",
+      "user": "Kullanıcı",
+      "user_hint": "Ad, e-posta veya telefon",
+      "channel": "Kanal",
+      "delete_limit_title": "Sınırı sil",
+      "delete_limit_message": "Kullanıcıya yeniden genel kural uygulanır.",
+      "err_target": "Bir kullanıcı veya kanal seçin.",
+      "err_seconds": "Saniye 0 ile 86400 arasında olmalı.",
+      "err_empty": "En az bir sınır girin."
     }
   }
 }
